@@ -122,10 +122,6 @@ Authorization: Bearer {{accessToken}}
 
 
 # 2. Deposit funds into the account
-#
-# A deposit is a request for money, not money: confirming it asks the provider
-# to collect, and the account is credited only when the provider calls back.
-
 
 ### 2.1 Create the deposit — a quote showing the fee and the balance after
 # channel: MPESA (needs msisdn), CARD, or AGENT (needs agentCode).
@@ -197,11 +193,6 @@ Authorization: Bearer {{accessToken}}
 
 
 # 3. Withdraw funds from the account
-#
-# The opposite of a deposit: the account is debited as soon as the withdrawal
-# is confirmed, and the callback only reports that the payout landed. A failed
-# payout reverses the debit.
-
 
 ### 3.1 Create the withdrawal — the quote includes any fee
 # channel: MPESA (needs msisdn) or AGENT (needs agentCode).
@@ -267,10 +258,6 @@ Authorization: Bearer {{accessToken}}
 
 
 # 4. Transfer funds to another account
-#
-# Both accounts are inside the bank, so there is no provider and no callback:
-# confirming moves the money in one ledger entry and answers 200 COMPLETED.
-
 
 ### 4.1 Check who owns the destination number — the masked name to confirm
 # Rate-limited: this is the endpoint that turns a number into a name.
