@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.2e Success */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${outcome.heading}">Withdrawal sent </title>
+</head>
+<body>
+<!--/* No header and no way back: the withdrawal is made. */-->
+<main class="screen">
+
+    <div class="screen__body">
+        <div class="done">
+            <span class="done__mark" th:if="${outcome.sent}">
+                <svg th:replace="~{fragments/icons :: check}"></svg>
+            </span>
+            <span class="done__badge done__badge--danger" th:if="${outcome.failed}">
+                <svg th:replace="~{fragments/icons :: cross}"></svg>
+            </span>
+
+            <h1 class="screen__title done__title" th:text="${outcome.heading}">Withdrawal sent</h1>
+            <p class="headline-amount" th:text="${intent.amount}">KES 2,000.00</p>
+            <p class="screen__lead done__lead" th:text="${outcome.detail}">
+                Check your M-Pesa messages for confirmation.
+            </p>
+        </div>
+
+        <!--/*
+          Shown as soon as it is sent, not only once it lands: the account was
+          debited when the customer confirmed, so the balance below is the real
+          one and the reference is a posting that exists.
+        */-->
+        <section class="summary" th:if="${outcome.sent}">
+            <dl class="summary__rows summary__rows--boxed">
+                <div class="summary__row">
+                    <dt class="summary__label">Sent to</dt>
+                    <dd class="summary__value"
+                        th:text="${destinationDetail} ? |${destinationLabel}, ${destinationDetail}| : ${destinationLabel}">
+                        M-Pesa, +254 7•• ••• 312
+                    </dd>
+                </div>
+                <div class="summary__row" th:if="${account}">
+                    <dt class="summary__label">Balance now</dt>
+                    <dd class="summary__value" th:text="${account.balance}">KES 22,500.00</dd>
+                </div>
+                <div class="summary__row" th:if="${intent.reference}">
+                    <dt class="summary__label">Reference</dt>
+                    <dd class="summary__value" th:text="${intent.reference}">KNX-WD-260922-0290</dd>
+                </div>
+            </dl>
+        </section>
+    </div>
+
+    <nav class="screen__actions">
+        <a class="button button--primary" th:href="@{/dashboard}">Done</a>
+        <a class="button button--secondary" th:if="${outcome.sent}" th:href="@{/activity}">View receipt</a>
+        <a class="button button--secondary" th:if="${outcome.failed}" th:href="@{/withdrawals}">Try again</a>
+    </nav>
+
+</main>
+</body>
+</html>

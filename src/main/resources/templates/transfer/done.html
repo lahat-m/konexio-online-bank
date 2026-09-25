@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.3f Success */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${outcome.heading}">Money sent</title>
+</head>
+<body>
+<!--/* No header and no way back: the money has moved. */-->
+<main class="screen">
+
+    <div class="screen__body">
+        <div class="done">
+            <span class="done__mark" th:if="${outcome.sent}">
+                <svg th:replace="~{fragments/icons :: check}"></svg>
+            </span>
+            <span class="done__badge done__badge--danger" th:if="${outcome.failed}">
+                <svg th:replace="~{fragments/icons :: cross}"></svg>
+            </span>
+
+            <h1 class="screen__title done__title" th:text="${outcome.heading}">Money sent</h1>
+            <p class="headline-amount" th:text="${amount}">KES 3,500.00</p>
+
+            <!--/*
+              Their name, then what happened to the money. "Their" account and not
+              "his": the bank holds a name, not a gender, so there is nothing here
+              to guess from.
+            */-->
+            <p class="screen__lead done__lead" th:if="${outcome.sent}">
+                <span class="masked-name" th:text="${recipient.maskedName}">Joseph Ot*****</span>
+                <span th:text="${outcome.detail}">has received it in their Konexio account.</span>
+            </p>
+            <p class="screen__lead done__lead" th:unless="${outcome.sent}" th:text="${outcome.detail}">
+                Nothing left your account.
+            </p>
+        </div>
+
+        <!--/*
+          All three are true the moment the entry is posted, which is why they are
+          shown here rather than promised for later.
+        */-->
+        <section class="summary" th:if="${outcome.sent}">
+            <dl class="summary__rows summary__rows--boxed">
+                <div class="summary__row" th:if="${balanceNow}">
+                    <dt class="summary__label">Balance now</dt>
+                    <!--/*
+                      The mock reads "KES 21,000.00 less fee" because its fee was a
+                      placeholder. This is the balance the ledger stamped, fee and
+                      all.
+                    */-->
+                    <dd class="summary__value" th:text="${balanceNow}">KES 6,500.00</dd>
+                </div>
+                <div class="summary__row" th:if="${intent.reference}">
+                    <dt class="summary__label">Reference</dt>
+                    <dd class="summary__value" th:text="${intent.reference}">KNX-TR-260922-0433</dd>
+                </div>
+                <div class="summary__row" th:if="${sentAt}">
+                    <dt class="summary__label">Date</dt>
+                    <dd class="summary__value" th:text="${sentAt}">22 Sep 2026, 10:05</dd>
+                </div>
+            </dl>
+        </section>
+    </div>
+
+    <nav class="screen__actions">
+        <a class="button button--primary" th:href="@{/dashboard}">Done</a>
+        <!--/* The receipt lives with the transaction, not with this flow. */-->
+        <a class="button button--secondary" th:if="${outcome.sent}" th:href="@{/activity}">Share receipt</a>
+        <a class="button button--secondary" th:if="${outcome.failed}" th:href="@{/transfers}">Try again</a>
+    </nav>
+
+</main>
+</body>
+</html>

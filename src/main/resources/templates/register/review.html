@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!--/* docs/screens/0.7 Review & terms */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Check your details</title>
+</head>
+<body>
+<main class="screen">
+
+    <!--/* No progress bar: the four steps are answered, and this is the confirmation. */-->
+    <header th:replace="~{fragments/screen :: header('Create account', @{/register/pin})}"></header>
+
+    <form class="screen__form" method="post" th:action="@{/register/review}" th:object="${signUp}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">Check your details</h1>
+            <p class="screen__lead">Make sure everything matches your ID before we open your account.</p>
+
+            <div class="alert alert--error" th:if="${reviewError}" role="alert">
+                <p th:text="${reviewError}"></p>
+            </div>
+
+            <section class="summary">
+                <header class="summary__header">
+                    <h2 class="summary__title">Personal</h2>
+                    <a class="link" th:href="@{/register/details}">Edit</a>
+                </header>
+                <dl class="summary__rows">
+                    <div class="summary__row">
+                        <dt class="summary__label">Full name</dt>
+                        <dd class="summary__value" th:text="*{fullName}">Amina Wanjiru</dd>
+                    </div>
+                    <div class="summary__row">
+                        <dt class="summary__label">National ID</dt>
+                        <dd class="summary__value" th:text="${nationalIdMasked}">••••5678</dd>
+                    </div>
+                    <div class="summary__row">
+                        <dt class="summary__label">Date of birth</dt>
+                        <dd class="summary__value" th:text="${dateOfBirthLabel}">14 Mar 2000</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="summary">
+                <header class="summary__header">
+                    <h2 class="summary__title">Contact</h2>
+                    <a class="link" th:href="@{/register/contact}">Edit</a>
+                </header>
+                <dl class="summary__rows">
+                    <div class="summary__row">
+                        <dt class="summary__label">Phone</dt>
+                        <dd class="summary__value" th:text="*{phoneMasked}">+254 7•• ••• 312</dd>
+                    </div>
+                    <div class="summary__row">
+                        <dt class="summary__label">Email</dt>
+                        <dd class="summary__value" th:text="*{email}">amina.w@example.com</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <div class="checkbox" th:classappend="${termsError} ? 'checkbox--invalid'">
+                <input class="checkbox__control" type="checkbox" id="terms" name="terms" value="accepted">
+                <label class="checkbox__label" for="terms">
+                    I agree to the <a class="link" th:href="@{/terms}">Terms and Conditions</a>
+                    and <a class="link" th:href="@{/privacy}">Privacy Policy</a>.
+                </label>
+            </div>
+            <p class="field__error" th:if="${termsError}" th:text="${termsError}" role="alert"></p>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Create my account</button>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

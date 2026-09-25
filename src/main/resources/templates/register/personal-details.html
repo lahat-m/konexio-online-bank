@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!--/* docs/screens/0.3 Personal details */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Tell us about yourself</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Create account', @{/register})}"></header>
+    <div th:replace="~{fragments/screen :: progress(1, 4, 'Personal details')}"></div>
+
+    <form class="screen__form" method="post" th:action="@{/register/details}" th:object="${signUp}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">Tell us about yourself</h1>
+            <p class="screen__lead">Enter your details exactly as they appear on your National ID.</p>
+
+            <div class="form">
+                <div class="field" th:classappend="${#fields.hasErrors('fullName')} ? 'field--invalid'">
+                    <label class="field__label" for="fullName">Full name</label>
+                    <input class="field__control" type="text" id="fullName" th:field="*{fullName}"
+                           autocomplete="name" autocapitalize="words" enterkeyhint="next">
+                    <p class="field__error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></p>
+                </div>
+
+                <div class="field" th:classappend="${#fields.hasErrors('nationalId')} ? 'field--invalid'">
+                    <label class="field__label" for="nationalId">National ID number</label>
+                    <input class="field__control" type="text" id="nationalId" th:field="*{nationalId}"
+                           placeholder="e.g. 12345678" inputmode="numeric" autocomplete="off" enterkeyhint="next">
+                    <p class="field__error" th:if="${#fields.hasErrors('nationalId')}" th:errors="*{nationalId}"></p>
+                </div>
+
+                <div class="field" th:classappend="${#fields.hasErrors('dateOfBirth')} ? 'field--invalid'">
+                    <label class="field__label" for="dateOfBirth">Date of birth</label>
+                    <input class="field__control" type="text" id="dateOfBirth" th:field="*{dateOfBirth}"
+                           placeholder="DD / MM / YYYY" inputmode="numeric" autocomplete="off"
+                           enterkeyhint="done" aria-describedby="dateOfBirthHint">
+                    <p class="field__error" th:if="${#fields.hasErrors('dateOfBirth')}"
+                       th:errors="*{dateOfBirth}"></p>
+                    <p class="field__hint" id="dateOfBirthHint"
+                       th:text="|You must be ${minimumAge} or older to open an account.|">
+                        You must be 18 or older to open an account.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Continue</button>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

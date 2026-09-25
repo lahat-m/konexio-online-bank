@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<!--/* docs/screens/2 Home */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Home</title>
+</head>
+<body>
+<main class="screen screen--tabbed">
+
+    <header class="greeting">
+        <div>
+            <p class="greeting__time" th:text="${greeting}">Good morning</p>
+            <p class="greeting__name" th:text="${firstName}">Amina</p>
+        </div>
+        <details class="account-menu">
+            <summary class="avatar account-menu__trigger" th:text="${initials}"
+                     aria-label="Account menu">AW</summary>
+            <div class="account-menu__panel">
+                <p class="account-menu__name" th:text="${firstName}">Amina</p>
+                <form method="post" th:action="@{/logout}">
+                    <button class="account-menu__item" type="submit">Log out</button>
+                </form>
+            </div>
+        </details>
+    </header>
+
+    <div class="screen__body">
+
+        <!--/* The balance card, or the reason there is no balance to show. */-->
+        <section class="account-card" th:if="${account}">
+            <div class="account-card__row account-card__row--flush">
+                <p class="account-card__label">Main account balance</p>
+                <button class="icon-button icon-button--quiet balance-toggle" type="button"
+                        aria-label="Hide balance">
+                    <svg th:replace="~{fragments/icons :: eye}"></svg>
+                </button>
+            </div>
+            <p class="account-card__balance-amount">
+                <span th:text="${account.balance.currency}">KES</span>
+                <span class="balance-amount" th:text="${balanceAmount}">24,500.00</span>
+            </p>
+            <div class="account-card__row account-card__row--flush">
+                <p class="account-card__label"
+                   th:text="|Acc no. ${accountNumberGrouped}|">Acc no. 1002 4587 3310</p>
+                <button class="copy" type="button" th:attr="data-copy=${account.accountNumber}">Copy</button>
+            </div>
+        </section>
+
+        <p class="empty" th:unless="${account}">
+            You have no account open yet. <a class="link" th:href="@{/accounts}">Open one</a> to get started.
+        </p>
+
+        <nav class="quick-actions" aria-label="Move money">
+            <a class="quick-action" th:href="@{/deposits}">
+                <span class="quick-action__badge"><svg th:replace="~{fragments/icons :: arrow-down}"></svg></span>
+                <span class="quick-action__label">Deposit</span>
+            </a>
+            <a class="quick-action" th:href="@{/withdrawals}">
+                <span class="quick-action__badge"><svg th:replace="~{fragments/icons :: arrow-up}"></svg></span>
+                <span class="quick-action__label">Withdraw</span>
+            </a>
+            <a class="quick-action" th:href="@{/transfers}">
+                <span class="quick-action__badge"><svg th:replace="~{fragments/icons :: transfer}"></svg></span>
+                <span class="quick-action__label">Transfer</span>
+            </a>
+            <a class="quick-action" th:href="@{/loans}">
+                <span class="quick-action__badge"><svg th:replace="~{fragments/icons :: card}"></svg></span>
+                <span class="quick-action__label">Loans</span>
+            </a>
+        </nav>
+
+        <!--/* Only when there is one: a card saying "no loan" is not news. */-->
+        <a class="row-card" th:if="${loan}" th:href="@{/loans}">
+            <span class="row-card__badge"><svg th:replace="~{fragments/icons :: card}"></svg></span>
+            <span class="row-card__text">
+                <span class="row-card__title">Loan account</span>
+                <span class="row-card__detail"
+                      th:text="|${loan.outstanding} due ${loanDueDate}|">KES 11,500.00 due 20 Oct 2026</span>
+            </span>
+            <svg th:replace="~{fragments/icons :: chevron-right}"></svg>
+        </a>
+
+        <section class="activity">
+            <header class="activity__header">
+                <h2 class="activity__title">Recent activity</h2>
+                <a class="link" th:href="@{/activity}">See all</a>
+            </header>
+
+            <p class="empty" th:if="${activity.isEmpty()}">
+                Nothing has moved yet. Your first deposit will show up here.
+            </p>
+
+            <ul class="activity__list" th:unless="${activity.isEmpty()}">
+                <li class="activity__item" th:each="row : ${activity}">
+                    <span class="activity__text">
+                        <span class="activity__description" th:text="${row.description}">Deposit from M-Pesa</span>
+                        <span class="activity__when" th:text="${row.when}">Today, 09:14</span>
+                    </span>
+                    <span class="activity__amount"
+                          th:classappend="${row.incoming} ? 'activity__amount--in'"
+                          th:text="${row.amount}">+5,000.00</span>
+                </li>
+            </ul>
+        </section>
+
+    </div>
+
+    <nav th:replace="~{fragments/screen :: tabs('home')}"></nav>
+
+    <script th:src="@{/js/copy.js}" defer></script>
+    <script th:src="@{/js/balance.js}" defer></script>
+
+</main>
+</body>
+</html>

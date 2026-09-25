@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.1c Review */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Review deposit</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Deposit', @{/deposits/amount})}"></header>
+
+    <form class="screen__form" method="post" th:action="@{/deposits/review}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">Review deposit</h1>
+
+            <!--/* The figure being agreed to, big enough that nobody confirms the wrong one. */-->
+            <p class="headline-amount" th:text="${intent.amount}">KES 5,000.00</p>
+
+            <section class="summary">
+                <dl class="summary__rows summary__rows--boxed">
+                    <div class="summary__row">
+                        <dt class="summary__label">From</dt>
+                        <dd class="summary__value">
+                            <span th:text="${sourceLabel}">M-Pesa</span>
+                            <span class="summary__subvalue" th:if="${sourceDetail}"
+                                  th:text="${sourceDetail}">+254 7•• ••• 312</span>
+                        </dd>
+                    </div>
+                    <div class="summary__row" th:if="${account}">
+                        <dt class="summary__label">To</dt>
+                        <dd class="summary__value">
+                            <span th:text="${accountLabel}">Main account</span>
+                            <span class="summary__subvalue" th:text="${account.maskedNumber}">••••3310</span>
+                        </dd>
+                    </div>
+                    <div class="summary__row">
+                        <dt class="summary__label">Fee</dt>
+                        <dd class="summary__value" th:text="${intent.fee}">KES 0.00</dd>
+                    </div>
+                    <div class="summary__row summary__row--total">
+                        <dt class="summary__label summary__label--strong">Balance after</dt>
+                        <dd class="summary__value" th:text="${intent.quotedBalanceAfter}">KES 29,500.00</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <!--/* What Confirm will actually do, said before it is pressed. */-->
+            <aside class="note" role="note">
+                <svg th:replace="~{fragments/icons :: info}"></svg>
+                <p th:text="${prompt}">
+                    You'll get an M-Pesa prompt on your phone. Enter your M-Pesa PIN there to approve.
+                </p>
+            </aside>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Confirm deposit</button>
+            <a class="button button--secondary" th:href="@{/deposits/amount}">Edit amount</a>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

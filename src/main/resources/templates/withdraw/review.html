@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.2c Review */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Review withdrawal</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Withdraw', @{/withdrawals/amount})}"></header>
+
+    <form class="screen__form" method="post" th:action="@{/withdrawals/review}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">Review withdrawal</h1>
+
+            <p class="headline-amount" th:text="${intent.amount}">KES 2,000.00</p>
+
+            <section class="summary">
+                <dl class="summary__rows summary__rows--boxed">
+                    <!--/* Out of, then into: a withdrawal is read in the direction the money goes. */-->
+                    <div class="summary__row" th:if="${account}">
+                        <dt class="summary__label">From</dt>
+                        <dd class="summary__value">
+                            <span th:text="${accountLabel}">Main account</span>
+                            <span class="summary__subvalue" th:text="${account.maskedNumber}">••••3310</span>
+                        </dd>
+                    </div>
+                    <div class="summary__row">
+                        <dt class="summary__label">To</dt>
+                        <dd class="summary__value">
+                            <span th:text="${destinationLabel}">M-Pesa</span>
+                            <span class="summary__subvalue" th:if="${destinationDetail}"
+                                  th:text="${destinationDetail}">+254 7•• ••• 312</span>
+                        </dd>
+                    </div>
+                    <div class="summary__row">
+                        <dt class="summary__label">Fee</dt>
+                        <dd class="summary__value" th:text="${intent.fee}">KES 0.00</dd>
+                    </div>
+                    <!--/*
+                      The mock says "less fee" because its fee was a placeholder.
+                      Here the fee is known, so the figure already has it taken
+                      off — a customer should not have to do the subtraction.
+                    */-->
+                    <div class="summary__row summary__row--total">
+                        <dt class="summary__label summary__label--strong">Balance after</dt>
+                        <dd class="summary__value" th:text="${intent.quotedBalanceAfter}">KES 22,500.00</dd>
+                    </div>
+                </dl>
+            </section>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Confirm withdrawal</button>
+            <a class="button button--secondary" th:href="@{/withdrawals/amount}">Edit amount</a>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.1e Success, 3.1f Failure */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${outcome.heading}">Deposit successful</title>
+</head>
+<body>
+<!--/* No header and no way back: the deposit is made, and there is nothing behind this. */-->
+<main class="screen">
+
+    <div class="screen__body">
+        <div class="done">
+            <!--/*
+              A tick when the money has arrived, a clock while it is on its way,
+              a cross when it did not happen. The mark is the first thing read,
+              so it has to be the first thing that is true.
+            */-->
+            <span class="done__mark" th:if="${outcome.settled}">
+                <svg th:replace="~{fragments/icons :: check}"></svg>
+            </span>
+            <span class="done__badge done__badge--waiting" th:if="${!outcome.settled and !outcome.failed}">
+                <svg th:replace="~{fragments/icons :: clock}"></svg>
+            </span>
+            <span class="done__badge done__badge--danger" th:if="${outcome.failed}">
+                <svg th:replace="~{fragments/icons :: cross}"></svg>
+            </span>
+
+            <h1 class="screen__title done__title" th:text="${outcome.heading}">Deposit successful</h1>
+
+            <!--/*
+              A deposit that worked is about the amount, so it is the headline. One
+              that did not is about why, so the amount steps back to a line that
+              says which deposit this was.
+            */-->
+            <th:block th:if="${!outcome.failed}">
+                <p class="headline-amount" th:text="${intent.amount}">KES 5,000.00</p>
+                <p class="screen__lead done__lead" th:text="${outcome.detail}">
+                    Your money is in your account.
+                </p>
+            </th:block>
+            <p class="screen__lead done__lead" th:if="${outcome.failed}"
+               th:text="|${intent.amount} from ${sourceLabel}|">KES 5,000.00 from M-Pesa</p>
+        </div>
+
+        <!--/* The provider's reason, in its own words: it is what the customer can act on. */-->
+        <aside class="note note--error" th:if="${outcome.failed}" role="alert">
+            <svg th:replace="~{fragments/icons :: alert}"></svg>
+            <p th:text="${outcome.detail}">
+                The M-Pesa prompt expired before it was approved. No money left your M-Pesa account.
+            </p>
+        </aside>
+
+        <section class="advice" th:if="${outcome.advice}">
+            <h2 class="advice__title">What to do next</h2>
+            <p class="advice__detail" th:text="${outcome.advice}">
+                Keep your phone unlocked and approve the prompt within 60 seconds.
+            </p>
+        </section>
+
+        <section class="summary" th:unless="${outcome.failed}">
+            <dl class="summary__rows summary__rows--boxed">
+                <!--/* Only once it is really there. Until then a balance would be the old one. */-->
+                <div class="summary__row" th:if="${outcome.settled and account != null}">
+                    <dt class="summary__label">Balance now</dt>
+                    <dd class="summary__value" th:text="${account.balance}">KES 29,500.00</dd>
+                </div>
+                <div class="summary__row" th:if="${account}">
+                    <dt class="summary__label">Into</dt>
+                    <dd class="summary__value">
+                        <span th:text="${accountLabel}">Main account</span>
+                        <span class="summary__subvalue" th:text="${account.maskedNumber}">••••3310</span>
+                    </dd>
+                </div>
+                <!--/* The ledger's reference, which exists only once something is posted. */-->
+                <div class="summary__row" th:if="${intent.reference}">
+                    <dt class="summary__label">Reference</dt>
+                    <dd class="summary__value" th:text="${intent.reference}">KNX-DP-260922-0417</dd>
+                </div>
+                <div class="summary__row" th:if="${moment}">
+                    <dt class="summary__label">Date</dt>
+                    <dd class="summary__value" th:text="${moment}">22 Sep 2026, 09:14</dd>
+                </div>
+            </dl>
+        </section>
+    </div>
+
+    <nav class="screen__actions">
+        <a class="button button--primary" th:if="${outcome.failed}" th:href="@{/deposits}">Try again</a>
+        <a class="button" th:classappend="${outcome.failed} ? 'button--secondary' : 'button--primary'"
+           th:href="@{/dashboard}" th:text="${outcome.failed} ? 'Go home' : 'Done'">Done</a>
+        <a class="button button--secondary" th:if="${outcome.settled}" th:href="@{/activity}">View receipt</a>
+    </nav>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.3c Amount */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>How much?</title>
+</head>
+<body>
+<main class="screen">
+
+    <!--/* Named after the person, so the header says who this money is for. */-->
+    <header th:replace="~{fragments/screen :: header(${recipient.sendTitle}, @{/transfers/confirm})}"></header>
+
+    <form class="screen__form" method="post" th:action="@{/transfers/amount}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">How much?</h1>
+
+            <div class="field" th:classappend="${amountError} ? 'field--invalid'">
+                <label class="field__label" for="amount">Amount</label>
+                <!--/*
+                  data-available is what the balance is, so the script can say
+                  "more than you have" while the number is still being typed. The
+                  server checks it again, and the ledger checks it last.
+                */-->
+                <div class="amount-field">
+                    <span class="amount-field__currency"
+                          th:text="${account} ? ${account.balance.currency} : 'KES'">KES</span>
+                    <input class="amount-field__input" type="text" id="amount" name="amount"
+                           th:value="${typedAmount}"
+                           th:attr="data-available=${account} ? ${account.balance.amount} : null"
+                           inputmode="decimal" autocomplete="off" enterkeyhint="done" autofocus>
+                </div>
+
+                <p class="field__error field__error--iconed" th:if="${amountError}" role="alert">
+                    <svg th:replace="~{fragments/icons :: alert}"></svg>
+                    <span th:text="${amountError}">
+                        That is more than your available balance of KES 24,500.00. Enter a smaller amount.
+                    </span>
+                </p>
+
+                <!--/*
+                  The balance rather than the limits the other flows state: the
+                  fee on an internal transfer is nothing, so what a customer can
+                  send is simply what they have.
+                */-->
+                <p class="field__hint" th:if="${available}"
+                   th:text="|Available: ${available}|">Available: KES 24,500.00</p>
+            </div>
+
+            <div class="pills">
+                <button class="pill" type="button" th:each="quick : ${quickAmounts}"
+                        th:attr="data-amount=${quick}"
+                        th:text="${#numbers.formatDecimal(quick, 1, 'COMMA', 0, 'POINT')}">2,000</button>
+            </div>
+
+            <!--/*
+              Optional, and said so in the label: a customer who leaves it empty
+              has not skipped a step. It is the recipient who reads it, which is
+              why it is their name on the label and not the word "reference".
+            */-->
+            <div class="field">
+                <label class="field__label" for="note" th:text="${recipient.noteLabel}">
+                    Note for Joseph (optional)
+                </label>
+                <input class="field__control" type="text" id="note" name="note"
+                       th:value="${transfer.note}" th:maxlength="${noteLimit}"
+                       autocomplete="off" enterkeyhint="done" aria-describedby="noteHint">
+                <p class="field__hint" id="noteHint" th:text="${recipient.noteHint}">
+                    Joseph will see this on their statement.
+                </p>
+            </div>
+        </div>
+
+        <nav class="screen__actions">
+            <!--/*
+              Never disabled from the server. The mock greys it while the amount
+              is wrong, which amount.js does live; if the script never runs, the
+              button has to stay usable or a customer who typed too much could not
+              correct it and try again.
+            */-->
+            <button class="button button--primary" type="submit">Continue</button>
+        </nav>
+
+    </form>
+
+    <script th:src="@{/js/amount.js}" defer></script>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<!--/*
+  The shell every screen is poured into: the document, the viewport, the one
+  stylesheet. A screen passes its own <title> and <main> in, so no page repeats
+  the head and none of them can disagree about it.
+
+  Used as: <html th:replace="~{layout :: page(~{::title}, ~{::main})}">
+*/-->
+<html th:fragment="page(title, content)" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0f5b4d">
+    <th:block th:replace="${title}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/konexio.css}">
+    <title></title>
+</head>
+<body class="page">
+<th:block th:replace="${content}"></th:block>
+</body>
+</html>

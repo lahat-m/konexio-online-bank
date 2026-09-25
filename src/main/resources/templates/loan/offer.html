@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!--/* docs/screens/6.1 Loan offer */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Loans</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Loans', @{/dashboard})}"></header>
+
+    <div class="screen__body">
+
+        <!--/*
+          The figure first and on dark, because it is the whole offer. Everything
+          under it is what taking it costs.
+        */-->
+        <section class="offer-card" th:if="${offer}">
+            <p class="offer-card__label">You can borrow</p>
+            <p class="offer-card__amount" th:text="${offer.principal}">KES 10,000.00</p>
+            <p class="offer-card__detail" th:if="${into}"
+               th:text="|Paid straight into your ${into}.|">
+                Paid straight into your main account ••••3310.
+            </p>
+        </section>
+
+        <div th:if="${offer}">
+            <h2 class="screen__subtitle">How it works</h2>
+            <ul class="checklist">
+                <li class="checklist__item">
+                    <span class="check__mark check__mark--passed" aria-hidden="true">
+                        <svg th:replace="~{fragments/icons :: check}"></svg>
+                    </span>
+                    <span class="checklist__text">The money arrives as soon as you accept.</span>
+                </li>
+                <li class="checklist__item">
+                    <span class="check__mark check__mark--passed" aria-hidden="true">
+                        <svg th:replace="~{fragments/icons :: check}"></svg>
+                    </span>
+                    <span class="checklist__text"
+                          th:text="|You repay ${offer.total} in one payment by ${offer.dueDate}.|">
+                        You repay KES 10,500.00 in one payment by 22 Oct 2026.
+                    </span>
+                </li>
+                <li class="checklist__item">
+                    <span class="check__mark check__mark--passed" aria-hidden="true">
+                        <svg th:replace="~{fragments/icons :: check}"></svg>
+                    </span>
+                    <span class="checklist__text">A separate loan account shows what you owe and when.</span>
+                </li>
+            </ul>
+        </div>
+
+        <!--/*
+          No offer is an answer, not an empty screen: the customer is told there
+          is nothing rather than shown a button that would refuse them.
+        */-->
+        <p class="empty" th:unless="${offer}">
+            <span th:if="${noOffer}" th:text="${noOffer}">
+                Your identity check is not complete, so a loan cannot be offered yet.
+            </span>
+            <span th:unless="${noOffer}">
+                There is no loan offer for you at the moment.
+            </span>
+        </p>
+
+    </div>
+
+    <nav class="screen__actions" th:if="${offer}">
+        <a class="button button--primary"
+           th:href="@{/loans/offers/{id}(id=${offer.id})}">See loan details</a>
+    </nav>
+
+</main>
+</body>
+</html>

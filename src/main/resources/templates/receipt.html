@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!--/* docs/screens/4.2 Receipt */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Receipt</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Receipt', @{/activity})}"></header>
+
+    <div class="screen__body">
+
+        <div class="receipt-head">
+            <!--/*
+              A posting exists because money moved, so a receipt in hand is always
+              of something that happened. The word is there because a customer
+              looking for proof is looking for exactly that word.
+            */-->
+            <p class="receipt-head__status">
+                <svg th:replace="~{fragments/icons :: check}"></svg>
+                <span>Successful</span>
+            </p>
+            <p class="headline-amount" th:text="${receipt.signedAmount}">−KES 3,500.00</p>
+            <!--/*
+              The books' own sentence for this entry, not one composed here: a
+              receipt that describes the movement differently from the statement
+              it came from is a receipt somebody has to reconcile.
+            */-->
+            <p class="screen__lead" th:text="${receipt.description}">Transfer: Cement, invoice 118</p>
+        </div>
+
+        <section class="summary">
+            <dl class="summary__rows summary__rows--boxed">
+                <div class="summary__row" th:if="${receipt.counterpartyAccount} or ${receipt.counterpartyDetail}">
+                    <dt class="summary__label" th:text="${receipt.counterpartyLabel}">Recipient account</dt>
+                    <dd class="summary__value">
+                        <span th:if="${receipt.counterpartyAccount}"
+                              th:text="|Konexio ${receipt.counterpartyAccount}|">Konexio ••••4420</span>
+                        <span th:if="${receipt.counterpartyDetail}" class="summary__subvalue"
+                              th:text="${receipt.counterpartyDetail}">+254 7•• ••• 312</span>
+                    </dd>
+                </div>
+                <div class="summary__row" th:if="${receipt.ownAccount}">
+                    <dt class="summary__label" th:text="${receipt.ownLabel}">From</dt>
+                    <dd class="summary__value" th:text="${receipt.ownAccount}">Main account ••••3310</dd>
+                </div>
+                <!--/* Absent rather than empty, as on the review. */-->
+                <div class="summary__row" th:if="${receipt.note}">
+                    <dt class="summary__label">Note</dt>
+                    <dd class="summary__value" th:text="${receipt.note}">Cement, invoice 118</dd>
+                </div>
+                <div class="summary__row">
+                    <dt class="summary__label">Fee</dt>
+                    <dd class="summary__value" th:text="${receipt.fee}">KES 0.00</dd>
+                </div>
+                <div class="summary__row">
+                    <dt class="summary__label">Date</dt>
+                    <dd class="summary__value" th:text="${receipt.date}">21 Sep 2026, 16:40</dd>
+                </div>
+                <div class="summary__row" th:if="${receipt.reference}">
+                    <dt class="summary__label">Reference</dt>
+                    <dd class="summary__value" th:text="${receipt.reference}">KNX-TR-260921-8830</dd>
+                </div>
+            </dl>
+        </section>
+
+    </div>
+
+    <nav class="screen__actions screen__actions--side-by-side">
+        <!--/*
+          Share is progressive: the browser's own share sheet where there is one,
+          and copying the link where there is not. Hidden until share.js decides
+          which, so it is never a button that does nothing.
+        */-->
+        <button class="button button--secondary share" type="button" hidden>
+            <svg th:replace="~{fragments/icons :: arrow-up}"></svg>
+            <span class="share__label">Share</span>
+        </button>
+        <a class="button button--secondary"
+           th:href="@{/activity/{id}/receipt.pdf(id=${receipt.id})}" download>
+            <svg th:replace="~{fragments/icons :: arrow-down}"></svg>
+            Download PDF
+        </a>
+    </nav>
+
+    <script th:src="@{/js/share.js}" defer></script>
+
+</main>
+</body>
+</html>

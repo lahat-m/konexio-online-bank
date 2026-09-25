@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!--/* docs/screens/5.3a Eligibility (blocked) */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Close account</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Close account', @{/accounts/{id}(id=${account.id})})}"></header>
+
+    <form class="screen__form" method="post"
+          th:action="@{/accounts/{id}/closure(id=${account.id})}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title" th:text="|Before you close ${accountName}|">
+                Before you close Savings ••••0457
+            </h1>
+            <p class="screen__lead">All three checks must pass.</p>
+
+            <ul class="checks">
+                <li class="check" th:each="check : ${checks}">
+                    <!--/*
+                      The mark carries the answer and the row carries the reason.
+                      Both are needed: a tick with no sentence under it leaves a
+                      customer guessing what was checked.
+                    */-->
+                    <span class="check__mark" th:classappend="${check.markClass}" aria-hidden="true">
+                        <svg th:if="${check.passed}" th:replace="~{fragments/icons :: check}"></svg>
+                        <svg th:unless="${check.passed}" th:replace="~{fragments/icons :: cross}"></svg>
+                    </span>
+                    <span class="check__text">
+                        <span class="check__title" th:text="${check.title}">Account is dormant</span>
+                        <span class="check__detail" th:text="${check.detail}">
+                            No activity since 14 Aug 2025.
+                        </span>
+                        <!--/* Only where there is something the customer can actually do. */-->
+                        <a class="link" th:if="${check.fixLabel}" th:href="@{${check.fixHref}}"
+                           th:text="${check.fixLabel}">Transfer balance</a>
+                    </span>
+                    <span class="visually-hidden" th:text="${check.passed} ? 'Passed' : 'Not passed'">Passed</span>
+                </li>
+            </ul>
+        </div>
+
+        <nav class="screen__actions">
+            <!--/*
+              Disabled from the server, unlike the amount screens: there the button
+              is the way out of a mistake, and here it is the way into something
+              permanent that the bank has already said no to.
+            */-->
+            <button class="button button--primary" type="submit" th:disabled="${!eligible}">Continue</button>
+            <p class="screen__footnote" th:unless="${eligible}">
+                <a class="link" th:href="@{/accounts/{id}/closure(id=${account.id})}">
+                    I've moved the balance, check again
+                </a>
+            </p>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

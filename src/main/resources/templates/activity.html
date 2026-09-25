@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!--/* docs/screens/4.1 History */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Activity</title>
+</head>
+<body>
+<main class="screen screen--tabbed">
+
+    <div class="screen__body">
+
+        <h1 class="screen__title">Activity</h1>
+        <nav class="pills" aria-label="Filter activity">
+            <a class="pill pill--link" th:each="chip : ${chips}"
+               th:href="@{/activity(filter=${chip.slug})}"
+               th:classappend="${chip.chosen} ? 'pill--chosen'"
+               th:text="${chip.label}"
+               th:attr="aria-current=${chip.chosen} ? 'page' : null">All</a>
+        </nav>
+
+        <p class="empty" th:if="${days.isEmpty()}">
+            Nothing here yet. Anything that moves in or out of your account will show up here.
+        </p>
+
+        <section class="activity" th:each="day : ${days}">
+            <h2 class="activity__day" th:text="${day.heading}">Today</h2>
+
+            <ul class="activity__list">
+                <li class="activity__item" th:each="entry : ${day.entries}">
+                    <!--/* The whole row is the link: it is one thing, and it opens one receipt. */-->
+                    <a class="activity__link" th:href="@{/activity/{id}(id=${entry.id})}">
+                        <span class="activity__badge" aria-hidden="true">
+                            <svg th:replace="~{fragments/icons :: __${entry.icon}__}"></svg>
+                        </span>
+                        <span class="activity__text">
+                            <span class="activity__description" th:text="${entry.description}">
+                                Deposit from M-Pesa
+                            </span>
+                            <span class="activity__when" th:text="${entry.time}">09:14</span>
+                        </span>
+                        <span class="activity__amount"
+                              th:classappend="${entry.incoming} ? 'activity__amount--in'"
+                              th:text="${entry.amount}">+5,000.00</span>
+                    </a>
+                </li>
+            </ul>
+        </section>
+
+    </div>
+
+    <nav th:replace="~{fragments/screen :: tabs('activity')}"></nav>
+
+</main>
+</body>
+</html>

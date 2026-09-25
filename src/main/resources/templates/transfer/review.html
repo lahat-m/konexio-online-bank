@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.3d Review */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Review transfer</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Send money', @{/transfers/amount})}"></header>
+
+    <form class="screen__form" method="post" th:action="@{/transfers/review}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">Review transfer</h1>
+
+            <p class="headline-amount" th:text="${amount}">KES 3,500.00</p>
+
+            <section class="summary">
+                <dl class="summary__rows summary__rows--boxed">
+                    <!--/* Who first: on this screen it is the person, not the figure, that is worth checking twice. */-->
+                    <div class="summary__row">
+                        <dt class="summary__label">To</dt>
+                        <dd class="summary__value">
+                            <span class="masked-name" th:text="${recipient.maskedName}">Joseph Ot*****</span>
+                            <span class="summary__subvalue"
+                                  th:text="|Konexio ${recipient.maskedAccountNumber}|">Konexio ••••4420</span>
+                        </dd>
+                    </div>
+                    <div class="summary__row" th:if="${account}">
+                        <dt class="summary__label">From</dt>
+                        <dd class="summary__value">
+                            <span th:text="${accountLabel}">Main account</span>
+                            <span class="summary__subvalue" th:text="${account.maskedNumber}">••••3310</span>
+                        </dd>
+                    </div>
+                    <!--/* Absent rather than empty: a Note row saying nothing is a row worth deleting. */-->
+                    <div class="summary__row" th:if="${note}">
+                        <dt class="summary__label">Note</dt>
+                        <dd class="summary__value" th:text="${note}">Cement, invoice 118</dd>
+                    </div>
+                    <div class="summary__row">
+                        <dt class="summary__label">Fee</dt>
+                        <dd class="summary__value" th:text="${fee}">KES 0.00</dd>
+                    </div>
+                    <!--/*
+                      The mock says "less fee" because its fee was a placeholder —
+                      it reads "KES [FEE]" one row above. Here the fee is quoted,
+                      so the figure already has it taken off and the customer is
+                      not left doing the subtraction.
+                    */-->
+                    <div class="summary__row summary__row--total">
+                        <dt class="summary__label summary__label--strong">Balance after</dt>
+                        <dd class="summary__value" th:text="${balanceAfter}">KES 21,000.00</dd>
+                    </div>
+                </dl>
+            </section>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit" th:text="${sendLabel}">Send KES 3,500.00</button>
+            <!--/* Back to the amount, which is the only thing still worth changing here. */-->
+            <a class="button button--secondary" th:href="@{/transfers/amount}">Edit</a>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

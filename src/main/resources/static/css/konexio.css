@@ -1,0 +1,2179 @@
+/*
+ * Konexio — the whole visual language of the customer screens.
+ *
+ * Templates carry classes and nothing else: no colours, no sizes, no style
+ * attributes. Everything below the tokens is written in terms of the tokens, so
+ * a change of brand is a change to :root and a screen that looks wrong is a
+ * class that is wrong, not a page that is wrong.
+ */
+
+:root {
+    /* Brand and ink */
+    --color-primary: #0f5b4d;
+    --color-primary-strong: #0b4539;
+    --color-primary-soft: #e3efe9;
+    --color-ink-inverse: #f7f9fa;
+    --color-ink-inverse-muted: #9fb0bb;
+    --color-surface-dark: #16232f;
+    --color-on-primary: #ffffff;
+
+    --color-ink: #11212e;
+    --color-ink-muted: #4a5c68;
+    --color-ink-subtle: #6b7c88;
+
+    /* Surfaces and lines */
+    --color-canvas: #ffffff;
+    --color-surface: #f2f4f5;
+    --color-border: #e3e8eb;
+    --color-border-dashed: #c9d2d7;
+    --color-border-strong: #1f2d38;
+    --color-field-border: #c7d0d5;
+    --color-track: #d7dde1;
+
+    --color-danger: #b42318;
+    --color-danger-soft: #fef3f2;
+    --color-info-soft: #eef2fb;
+    --color-info: #2f4a7a;
+    /* Check this, rather than stop: amber carries a caution red would overstate. */
+    --color-warning-soft: #fdf3d7;
+    --color-warning: #7a5a10;
+
+    --color-focus: #0f5b4d;
+
+    /* Type: one family, a scale that stops where the screens stop needing it */
+    --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    --text-caption: 0.9375rem;   /* 15px */
+    --text-body: 1.0625rem;      /* 17px */
+    --text-action: 1.0625rem;
+    --text-label: 1rem;          /* 16px */
+    --text-heading: 1.3125rem;   /* 21px, the flow name in a screen header */
+    --text-title: 2.125rem;      /* 34px */
+
+    --leading-tight: 1.15;
+    --leading-normal: 1.55;
+
+    --weight-regular: 400;
+    --weight-medium: 500;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+
+    /* Spacing: a 4px step, named by step and not by where it is used */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+
+    /* Shape */
+    --radius-control: 0.75rem;   /* buttons, inputs */
+    --radius-panel: 1rem;        /* illustrations, cards */
+    --radius-mark: 0.875rem;     /* the logo squircle */
+    --radius-pill: 999px;
+
+    --border-width: 1px;
+    --border-width-strong: 1.5px;
+
+    --shadow-card: 0 1px 2px rgba(17, 33, 46, 0.04), 0 12px 32px rgba(17, 33, 46, 0.08);
+
+    /* Layout */
+    --icon-size: 1.5rem;
+    --otp-box-size: 3.5rem;   /* one code box, square */
+    --pin-dot-size: 1.125rem;
+    --keypad-key-height: 4rem;
+    --checkbox-size: 1.5rem;
+    --radio-size: 1.5rem;
+    --badge-size: 5.5rem;
+    --brand-mark-large: 5.5rem;
+    --avatar-size: 3.25rem;
+    --quick-action-size: 3.5rem;
+    --tabs-height: 4.5rem;
+    --track-height: 0.3125rem;   /* 5px */
+    --screen-gutter: var(--space-5);
+    --screen-max-width: 30rem;   /* a phone column, centred on anything wider */
+    --control-height: 3.5rem;
+    --tap-target: 2.75rem;
+}
+
+/* ---------------------------------------------------------------- baseline */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body.page {
+    margin: 0;
+    min-height: 100dvh;
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-family);
+    font-size: var(--text-body);
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+    margin: 0;
+}
+
+p {
+    margin: 0;
+}
+
+a {
+    color: inherit;
+}
+
+:focus-visible {
+    outline: var(--border-width-strong) solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ screen */
+
+/*
+ * The phone is the design, so it is the base: one screen fills the viewport,
+ * header at the top, body taking what is left, actions at the bottom. The mocks
+ * pin the primary action to the thumb whether the content is four lines or
+ * forty, which is a column with a growing middle rather than a fixed footer.
+ *
+ * Everything wider is handled once, at the bottom of this file.
+ */
+.screen {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    max-width: var(--screen-max-width);
+    margin-inline: auto;
+    padding: var(--space-6) var(--screen-gutter)
+             calc(var(--space-6) + env(safe-area-inset-bottom));
+    gap: var(--space-6);
+}
+
+.screen__body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.screen__title {
+    font-size: var(--text-title);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+    text-wrap: balance;
+}
+
+.screen__lead {
+    color: var(--color-ink-muted);
+}
+
+/*
+ * A screen whose actions submit a form: the form is the column, because a
+ * button pinned to the bottom of the screen still has to be inside the form it
+ * sends. Same three parts, one element deeper.
+ */
+.screen__form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+/* The actions sit below the body, which has already taken the slack. */
+.screen__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+/* ------------------------------------------------------------ screen header */
+
+/*
+ * The way back, and the name of the flow you are in. Screen 0.1 has neither,
+ * which is why this is a fragment a screen opts into rather than part of
+ * .screen.
+ */
+.screen-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.screen-header__title {
+    margin: 0;
+    font-size: var(--text-heading);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.01em;
+}
+
+/* ------------------------------------------------------------- icon button */
+
+.icon-button {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: var(--tap-target);
+    height: var(--tap-target);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    text-decoration: none;
+    transition: background-color 120ms ease;
+}
+
+@media (hover: hover) {
+    .icon-button:hover {
+        background-color: var(--color-surface);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .icon-button {
+        transition: none;
+    }
+}
+
+/* -------------------------------------------------------------------- icon */
+
+/*
+ * The drawings in fragments/icons.html carry no attributes but their paths, so
+ * everything about how they look is here: an icon inherits its colour from
+ * whatever contains it, which is how the same chevron works on a white button
+ * and the same lock works in a green list.
+ */
+.icon {
+    flex: none;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* --------------------------------------------------------------- checklist */
+
+.checklist {
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+/*
+ * Rules between the rows and nowhere else: a line above the first row would
+ * fence the list off from the sentence that introduces it, and one below the
+ * last would draw a floor under empty space.
+ */
+.checklist__item + .checklist__item {
+    border-top: var(--border-width) solid var(--color-border);
+}
+
+.checklist__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    padding-block: var(--space-5);
+    color: var(--color-primary);
+}
+
+.checklist__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.checklist__title {
+    color: var(--color-ink);
+    font-weight: var(--weight-semibold);
+    line-height: 1.3;
+}
+
+.checklist__detail {
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+    line-height: 1.4;
+}
+
+/* ---------------------------------------------------------------- progress */
+
+.progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.progress__track {
+    display: flex;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.progress__step {
+    flex: 1 1 0;
+    height: var(--track-height);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-track);
+}
+
+.progress__step--done {
+    background-color: var(--color-primary);
+}
+
+.progress__label {
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+}
+
+/* ------------------------------------------------------------------- forms */
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    margin-top: var(--space-2);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+/* "Forgot PIN?" — a way out of the form, so it sits at its end, not in it. */
+.form__aside {
+    display: flex;
+    justify-content: flex-end;
+    font-size: var(--text-caption);
+}
+
+.field__label {
+    color: var(--color-ink);
+    font-size: var(--text-label);
+    font-weight: var(--weight-semibold);
+}
+
+.field__control {
+    width: 100%;
+    min-height: var(--control-height);
+    padding: var(--space-3) var(--space-4);
+    border: var(--border-width) solid var(--color-field-border);
+    border-radius: var(--radius-control);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font: inherit;
+}
+
+.field__control::placeholder {
+    color: var(--color-ink-subtle);
+}
+
+/*
+ * The border carries the focus, not just the ring: on a phone the ring is often
+ * clipped by the edge of the screen, and a field the customer is typing in has
+ * to look different from the two above it.
+ */
+.field__control:focus {
+    border-color: var(--color-primary);
+    outline: var(--border-width-strong) solid var(--color-focus);
+    outline-offset: 1px;
+}
+
+.field__hint {
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+}
+
+/*
+ * Errors are stated in words. The red border alone would say "something here",
+ * which is no use to somebody who cannot see it and not much use to anyone
+ * else — and .field--invalid is put on by the template only when there is a
+ * message under it.
+ */
+.field--invalid .field__control {
+    border-color: var(--color-danger);
+}
+
+.field__error {
+    color: var(--color-danger);
+    font-size: var(--text-caption);
+}
+
+/* With a mark beside it, for the refusals a customer has to read twice. */
+.field__error--iconed {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    font-weight: var(--weight-semibold);
+}
+
+.field__error--iconed .icon {
+    margin-top: 0.1em;
+}
+
+/* ------------------------------------------------------- compound controls */
+
+/*
+ * A control the customer types into, with a part of the answer already filled
+ * in beside it — the country code on a phone number. The prefix is a <span>,
+ * not a disabled input: there is nothing to type in it, and a disabled input is
+ * something a screen reader announces and a keyboard stops at for no reason.
+ */
+.field__group {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-3);
+}
+
+.field__prefix {
+    display: grid;
+    place-items: center;
+    flex: none;
+    min-height: var(--control-height);
+    padding-inline: var(--space-4);
+    border: var(--border-width) solid var(--color-field-border);
+    border-radius: var(--radius-control);
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-weight: var(--weight-medium);
+}
+
+.field__group .field__control {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* ------------------------------------------------------------- code entry */
+
+/*
+ * Six boxes, six inputs. They share a name so the server gets one array, and
+ * they are laid out as equal columns so the row stays on one line at every
+ * phone width rather than wrapping a digit onto its own.
+ *
+ * The columns are implicit, so the row fits however many digits identity's
+ * configured code has — the screen draws what it is told, and the stylesheet
+ * does not need telling.
+ */
+.otp {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+}
+
+.otp__digit {
+    min-width: 0;
+    height: var(--otp-box-size);
+    padding: 0;
+    border: var(--border-width) solid var(--color-field-border);
+    border-radius: var(--radius-control);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: inherit;
+    font-size: var(--text-title);
+    font-weight: var(--weight-semibold);
+    text-align: center;
+}
+
+/*
+ * A box with a digit in it is darker than an empty one, which is how the mock
+ * shows progress through the code. :placeholder-shown is what makes that
+ * possible without a script: every box carries a blank placeholder, so "shown"
+ * means "empty".
+ */
+.otp__digit:not(:placeholder-shown) {
+    border-color: var(--color-border-strong);
+}
+
+.otp__digit:focus {
+    border-color: var(--color-primary);
+    outline: var(--border-width-strong) solid var(--color-focus);
+    outline-offset: 1px;
+}
+
+.otp--invalid .otp__digit {
+    border-color: var(--color-danger);
+}
+
+/* The countdown on one side, the way out on the other. */
+.otp__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+    font-size: var(--text-caption);
+}
+
+.otp__countdown {
+    color: var(--color-ink-muted);
+}
+
+/* ------------------------------------------------------------- PIN keypad */
+
+.pin {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    margin-top: var(--space-4);
+}
+
+/*
+ * Before a script runs, the field is the way in and the keypad and dots are
+ * decoration that cannot do anything — so they are not there. pin.js adds
+ * .pin--keypad, and the two swap.
+ */
+.pin__dots,
+.keypad {
+    display: none;
+}
+
+.pin--keypad .pin__dots {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-5);
+}
+
+.pin--keypad .keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+}
+
+.pin--keypad .field {
+    display: none;
+}
+
+.pin__dot {
+    width: var(--pin-dot-size);
+    height: var(--pin-dot-size);
+    border: var(--border-width-strong) solid var(--color-ink);
+    border-radius: var(--radius-pill);
+}
+
+.pin__dot--filled {
+    background-color: var(--color-ink);
+}
+
+/*
+ * Keys are wide and short, as in the mock, and tall enough that a thumb does
+ * not need aiming. They are type="button": a keypad key that submitted the form
+ * on the first digit would be a hard bug to find.
+ */
+.keypad__key {
+    display: grid;
+    place-items: center;
+    min-height: var(--keypad-key-height);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: inherit;
+    font-size: var(--text-title);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+}
+
+/* Delete is not a digit, so it does not look like one. */
+.keypad__key--quiet {
+    border-color: transparent;
+    background-color: transparent;
+}
+
+.keypad__spacer {
+    display: block;
+}
+
+@media (hover: hover) {
+    .keypad__key:hover {
+        background-color: var(--color-border);
+    }
+
+    .keypad__key--quiet:hover {
+        background-color: var(--color-surface);
+    }
+}
+
+.keypad__key:active {
+    background-color: var(--color-border);
+}
+
+/* --------------------------------------------------------------- finished */
+
+/*
+ * The end of the sign-up: a tick, a sentence and the account. Centred, because
+ * there is nothing to scan down — it is one piece of good news.
+ */
+.done {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    margin-block: var(--space-10) var(--space-6);
+    text-align: center;
+}
+
+.done__badge {
+    display: grid;
+    place-items: center;
+    width: var(--badge-size);
+    height: var(--badge-size);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary-soft);
+    color: var(--color-primary);
+}
+
+/* The tick is the picture here, not an icon in a row of text. */
+.done__badge .icon {
+    width: calc(var(--icon-size) * 1.75);
+    height: calc(var(--icon-size) * 1.75);
+    stroke-width: 2.5;
+}
+
+.done__title,
+.done__lead {
+    text-align: center;
+}
+
+/*
+ * A mark with no disc behind it, for the screens whose designs draw one that
+ * way. The same size as the icon in a badge, so the two read as a pair.
+ */
+.done__mark {
+    display: grid;
+    place-items: center;
+    color: var(--color-primary);
+}
+
+.done__mark .icon {
+    width: calc(var(--icon-size) * 1.75);
+    height: calc(var(--icon-size) * 1.75);
+}
+
+/* On its way is not the same news as arrived, and does not get the same colour. */
+.done__badge--waiting {
+    background-color: var(--color-surface);
+    color: var(--color-ink-muted);
+}
+
+/* Nor is a refusal. Red, and only here — nothing else on these screens is. */
+.done__badge--danger {
+    background-color: var(--color-danger-soft);
+    color: var(--color-danger);
+}
+
+/* ----------------------------------------------------------- account card */
+
+/*
+ * Dark, unlike everything else, and deliberately: this is the one thing on the
+ * screen the customer has to come back to and read out, so it stops being part
+ * of the page and starts being an object.
+ */
+.account-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border-radius: var(--radius-panel);
+    background-color: var(--color-surface-dark);
+    color: var(--color-ink-inverse);
+}
+
+.account-card__label {
+    color: var(--color-ink-inverse-muted);
+    font-size: var(--text-caption);
+}
+
+.account-card__number-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+/*
+ * Tabular figures so the groups line up, and a size that can be read across a
+ * counter while somebody types it in.
+ */
+.account-card__number {
+    font-size: 1.75rem;
+    font-weight: var(--weight-bold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+}
+
+.account-card__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: var(--border-width) solid var(--color-ink-inverse-muted);
+}
+
+.account-card__balance {
+    font-weight: var(--weight-bold);
+}
+
+/* Hidden until copy.js finds a clipboard to write to; the number is selectable either way. */
+.copy {
+    display: none;
+    flex: none;
+    min-height: var(--tap-target);
+    padding-inline: var(--space-5);
+    border: var(--border-width) solid var(--color-ink-inverse-muted);
+    border-radius: var(--radius-pill);
+    background: none;
+    color: var(--color-ink-inverse);
+    font: inherit;
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+}
+
+.copy--ready {
+    display: block;
+}
+
+/* ------------------------------------------------------------------- home */
+
+/*
+ * A screen with a tab bar fixed to the bottom needs the room it takes, or the
+ * last row of content sits underneath it.
+ */
+.screen--tabbed {
+    padding-bottom: calc(var(--tabs-height) + var(--space-6) + env(safe-area-inset-bottom));
+}
+
+.greeting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.greeting__time {
+    color: var(--color-ink-muted);
+}
+
+.greeting__name {
+    font-size: var(--text-heading);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.01em;
+}
+
+.avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-weight: var(--weight-bold);
+}
+
+/* The one on a card of its own, rather than one of a list being scanned. */
+.avatar--large {
+    width: 4rem;
+    height: 4rem;
+    font-size: var(--text-heading);
+}
+
+/* The balance, which is the reason the screen exists. */
+.account-card__balance-amount {
+    font-size: 2.25rem;
+    font-weight: var(--weight-bold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.account-card__row--flush {
+    padding-top: 0;
+    border-top: none;
+}
+
+/* Quiet on the dark card: the eye is an offer, not an instruction. */
+.icon-button--quiet {
+    width: auto;
+    height: auto;
+    border: none;
+    background: none;
+    color: inherit;
+}
+
+.balance-toggle {
+    display: none;
+}
+
+.balance-toggle--ready {
+    display: grid;
+}
+
+/* ----------------------------------------------------------- quick actions */
+
+.quick-actions {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: var(--space-3);
+}
+
+.quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    text-decoration: none;
+}
+
+.quick-action__badge {
+    display: grid;
+    place-items: center;
+    width: var(--quick-action-size);
+    height: var(--quick-action-size);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary-soft);
+    color: var(--color-primary);
+}
+
+.quick-action__label {
+    font-size: var(--text-caption);
+    font-weight: var(--weight-semibold);
+    text-align: center;
+}
+
+/* -------------------------------------------------------------- row cards */
+
+/* A whole card that is one link, for "here is a thing, tap to see it". */
+.row-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-panel);
+    color: var(--color-ink);
+    text-decoration: none;
+}
+
+.row-card__badge {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: var(--quick-action-size);
+    height: var(--quick-action-size);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+}
+
+.row-card__text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.row-card__title {
+    font-weight: var(--weight-bold);
+}
+
+.row-card__detail {
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+}
+
+/* ------------------------------------------------------------------ people */
+
+/*
+ * A list of people to pick from. Each row is a submit button rather than a
+ * link, because choosing somebody is the same action as typing their number —
+ * so it looks like a row and behaves like the form it is in.
+ */
+.people {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.people__title {
+    margin: 0;
+    font-size: var(--text-label);
+    font-weight: var(--weight-bold);
+}
+
+.people__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.people__list li + li {
+    border-top: var(--border-width) solid var(--color-border);
+}
+
+.person {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    width: 100%;
+    padding: var(--space-4) 0;
+    border: none;
+    background: none;
+    color: var(--color-ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.person__text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.person__name {
+    font-weight: var(--weight-semibold);
+    overflow-wrap: anywhere;
+}
+
+.person__account {
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+}
+
+/* ----------------------------------------------------------- person card */
+
+/*
+ * One person, boxed and centred, on the screen that asks whether they are the
+ * right one (3.3b). The list above puts people in a row to be scanned; this
+ * stops on a single name and gives it the room to be read properly.
+ */
+.person-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-8) var(--space-5);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-panel);
+    text-align: center;
+}
+
+.person-card .avatar {
+    margin-bottom: var(--space-4);
+}
+
+/*
+ * Upper case here, not in the masked value: the mask is data the rest of the
+ * app shows as it is, and a name set in capitals on the one screen that asks
+ * "is this them?" is a styling decision about this screen.
+ */
+.person-card__name {
+    margin: 0;
+    font-size: var(--text-heading);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.person-card__account {
+    margin: 0;
+    color: var(--color-ink-muted);
+}
+
+/* ------------------------------------------------------------------- loans */
+
+/*
+ * The offer, on dark. Everything else on 6.1 is what taking it costs, and the
+ * one thing that should be read first is how much there is.
+ */
+.offer-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-6) var(--space-5);
+    border-radius: var(--radius-panel);
+    background-color: var(--color-surface-dark);
+    color: var(--color-ink-inverse);
+}
+
+.offer-card__label,
+.offer-card__detail {
+    margin: 0;
+    color: var(--color-ink-inverse-muted);
+}
+
+.offer-card__amount {
+    margin: 0;
+    font-size: 2.25rem;
+    font-weight: var(--weight-bold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+/* What is owed, and how far through repaying it the customer is (6.5). */
+.loan-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-panel);
+}
+
+.loan-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.loan-card__label,
+.loan-card__due,
+.loan-card__note {
+    margin: 0;
+}
+
+.loan-card__label {
+    color: var(--color-ink-muted);
+}
+
+.loan-card__amount {
+    margin: 0;
+    font-size: 2.25rem;
+    font-weight: var(--weight-bold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.loan-card__note {
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+}
+
+.progress-bar {
+    height: var(--space-2);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-track);
+    overflow: hidden;
+}
+
+.progress-bar__fill {
+    display: block;
+    height: 100%;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary);
+}
+
+/* A loan past its date is amber, like a dormant account: true, not alarming. */
+.badge--overdue {
+    background-color: var(--color-warning-soft);
+    color: var(--color-warning);
+}
+
+/* The subheading over a list that is not a form section. */
+.screen__subtitle {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-heading);
+    font-weight: var(--weight-bold);
+}
+
+/* ------------------------------------------------------------ account menu */
+
+/*
+ * The avatar on the home screen, which opens rather than decorates. Built on
+ * <details> so it works with no script: the marker is removed and the summary
+ * keeps the avatar's own shape.
+ */
+.account-menu {
+    position: relative;
+}
+
+.account-menu__trigger {
+    cursor: pointer;
+    list-style: none;
+}
+
+.account-menu__trigger::-webkit-details-marker {
+    display: none;
+}
+
+.account-menu__trigger:focus-visible {
+    outline: var(--border-width-strong) solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+/*
+ * Over the screen rather than pushing it down, and anchored to the right edge
+ * because that is the edge the avatar sits on.
+ */
+.account-menu__panel {
+    position: absolute;
+    right: 0;
+    z-index: 2;
+    min-width: 11rem;
+    margin-top: var(--space-2);
+    padding: var(--space-3);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-control);
+    background-color: var(--color-canvas);
+    box-shadow: 0 8px 24px rgb(17 33 46 / 12%);
+}
+
+.account-menu__name {
+    margin: 0 0 var(--space-2);
+    padding-inline: var(--space-2);
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+}
+
+.account-menu__item {
+    display: block;
+    width: 100%;
+    min-height: var(--tap-target);
+    padding-inline: var(--space-2);
+    border: none;
+    border-radius: var(--radius-control);
+    background: none;
+    color: var(--color-danger);
+    font: inherit;
+    font-weight: var(--weight-semibold);
+    text-align: left;
+    cursor: pointer;
+}
+
+.account-menu__item:hover,
+.account-menu__item:focus-visible {
+    background-color: var(--color-surface);
+}
+
+/* ---------------------------------------------------------------- accounts */
+
+/*
+ * One account on 5.1: a card rather than a list row, because each one carries
+ * four different things about itself and a row would make three of them small.
+ */
+.account-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-panel);
+    color: inherit;
+    text-decoration: none;
+}
+
+.account-row__head,
+.account-row__body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.account-row__label {
+    font-weight: var(--weight-bold);
+}
+
+.account-row__number {
+    color: var(--color-ink-muted);
+}
+
+.account-row__balance {
+    font-size: var(--text-heading);
+    font-weight: var(--weight-bold);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+/* The date under a dormant account, in the same amber as the word above it. */
+.account-row__note {
+    color: var(--color-warning);
+    font-size: var(--text-caption);
+}
+
+/*
+ * A status, said in a word. Dormant is amber rather than red: an account nobody
+ * has used is not a fault, and colouring it like one would send people to
+ * support over nothing.
+ */
+.badge {
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
+    font-size: var(--text-caption);
+    font-weight: var(--weight-semibold);
+    white-space: nowrap;
+}
+
+.badge--active {
+    background-color: var(--color-primary-soft);
+    color: var(--color-primary-strong);
+}
+
+.badge--dormant {
+    background-color: var(--color-warning-soft);
+    color: var(--color-warning);
+}
+
+.badge--closed {
+    background-color: var(--color-surface);
+    color: var(--color-ink-muted);
+}
+
+/* ------------------------------------------------------------ closure checks */
+
+.checks {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.check {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding-block: var(--space-5);
+    border-top: var(--border-width) solid var(--color-border);
+}
+
+.check:last-child {
+    border-bottom: var(--border-width) solid var(--color-border);
+}
+
+/* Green tick or red cross, in a disc: the answer before the sentence. */
+.check__mark {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border-radius: var(--radius-pill);
+}
+
+.check__mark--passed {
+    background-color: var(--color-primary-soft);
+    color: var(--color-primary);
+}
+
+.check__mark--failed {
+    background-color: var(--color-danger-soft);
+    color: var(--color-danger);
+}
+
+.check__text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.check__title {
+    font-weight: var(--weight-bold);
+}
+
+.check__detail {
+    color: var(--color-ink-muted);
+}
+
+/* ---------------------------------------------------------------- activity */
+
+/* The day a run of rows belongs to: Today, Yesterday, or its date. */
+.activity__day {
+    margin: 0 0 var(--space-2);
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+    font-weight: var(--weight-semibold);
+}
+
+/*
+ * The whole row is the link to its receipt, rather than a chevron at the end of
+ * it: the target is the thing you are looking at, and on a phone it wants to be
+ * the width of the screen.
+ */
+.activity__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+}
+
+.activity__badge {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: var(--quick-action-size);
+    height: var(--quick-action-size);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+}
+
+.activity {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.activity__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.activity__title {
+    margin: 0;
+    font-size: var(--text-heading);
+    font-weight: var(--weight-bold);
+}
+
+.activity__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.activity__item + .activity__item {
+    border-top: var(--border-width) solid var(--color-border);
+}
+
+.activity__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+}
+
+.activity__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.activity__description {
+    font-weight: var(--weight-semibold);
+    overflow-wrap: anywhere;
+}
+
+.activity__when {
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+}
+
+/*
+ * Money out is ordinary ink: a customer's own spending is not a warning, and
+ * colouring it red would make every normal week look alarming.
+ */
+.activity__amount {
+    flex: none;
+    font-weight: var(--weight-bold);
+    font-variant-numeric: tabular-nums;
+}
+
+.activity__amount--in {
+    color: var(--color-primary);
+}
+
+.empty {
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+}
+
+/* ------------------------------------------------------------------- tabs */
+
+/*
+ * Fixed to the bottom of the viewport rather than the end of the page: it is
+ * how you leave this screen, so it has to be reachable without scrolling to the
+ * end of somebody's transaction history.
+ */
+.tabs {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: var(--border-width) solid var(--color-border);
+    background-color: var(--color-canvas);
+}
+
+.tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: var(--tabs-height);
+    color: var(--color-ink-muted);
+    text-decoration: none;
+}
+
+.tab--current {
+    color: var(--color-primary);
+}
+
+.tab__label {
+    font-size: var(--text-caption);
+    font-weight: var(--weight-semibold);
+}
+
+/* ---------------------------------------------------------------- summary */
+
+/*
+ * What the customer told us, read back for confirmation. A description list,
+ * because that is what it is: a label and the value it belongs to, which is
+ * also how a screen reader should announce it.
+ */
+.summary {
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-panel);
+}
+
+.summary__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.summary__title {
+    margin: 0;
+    font-size: var(--text-label);
+    font-weight: var(--weight-bold);
+}
+
+.summary__rows {
+    margin: 0;
+    padding: var(--space-2) var(--space-5) var(--space-4);
+}
+
+/*
+ * Label left, value right, and the value wins the space: a long email address
+ * should wrap rather than push its label off the screen.
+ */
+.summary__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding-block: var(--space-3);
+}
+
+.summary__label {
+    flex: none;
+    color: var(--color-ink-muted);
+}
+
+.summary__value {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin: 0;
+    font-weight: var(--weight-semibold);
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+/*
+ * A masked recipient name wherever it is read back — the review row, the line
+ * above the PIN keypad. Capitals the way 3.3b sets them, by styling rather than
+ * by uppercasing the masked value itself, so what the page holds stays what the
+ * payment module said.
+ */
+.masked-name {
+    text-transform: uppercase;
+}
+
+/* The second line of a value: the number behind the name. */
+.summary__subvalue {
+    color: var(--color-ink-muted);
+    font-weight: var(--weight-regular);
+}
+
+/* A card whose rows are the whole card, with rules between them. */
+.summary__rows--boxed {
+    padding: 0;
+}
+
+.summary__rows--boxed .summary__row {
+    padding: var(--space-4) var(--space-5);
+}
+
+.summary__rows--boxed .summary__row + .summary__row {
+    border-top: var(--border-width) solid var(--color-border);
+}
+
+/*
+ * The line that answers "and then what will I have?" — shaded, because it is
+ * the one figure on the card the customer is really checking.
+ */
+.summary__row--total {
+    background-color: var(--color-surface);
+    border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+}
+
+.summary__label--strong {
+    color: var(--color-ink);
+    font-weight: var(--weight-bold);
+}
+
+/* ------------------------------------------------------------ amount field */
+
+/*
+ * The one number the screen is about, so it is the biggest thing on it. The
+ * currency sits inside the field rather than above it: what is being typed is
+ * an amount of shillings, not a number that happens to be money.
+ */
+.amount-field {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    border: var(--border-width-strong) solid var(--color-primary);
+    border-radius: var(--radius-panel);
+    background-color: var(--color-canvas);
+}
+
+.amount-field:focus-within {
+    outline: var(--border-width-strong) solid var(--color-focus);
+    outline-offset: 1px;
+}
+
+.amount-field__currency {
+    flex: none;
+    color: var(--color-ink-muted);
+    font-size: var(--text-heading);
+    font-weight: var(--weight-semibold);
+}
+
+.amount-field__input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-ink);
+    font-family: inherit;
+    font-size: 2.25rem;
+    font-weight: var(--weight-bold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.amount-field__input:focus {
+    outline: none;
+}
+
+.field--invalid .amount-field {
+    border-color: var(--color-danger);
+}
+
+/* -------------------------------------------------------------------- pills */
+
+.pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+/* Hidden until amount.js can make them do something. */
+.pill {
+    display: none;
+    min-height: var(--tap-target);
+    padding-inline: var(--space-5);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font: inherit;
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+}
+
+.pill--ready {
+    display: block;
+}
+
+/*
+ * A pill that is a link — the filter chips on 4.1. Visible from the start,
+ * unlike the one-tap amounts: there is no script to wait for, because narrowing
+ * a list is just another URL.
+ */
+.pill--link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.pill--chosen {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-soft);
+    color: var(--color-primary);
+}
+
+/* ----------------------------------------------------------------- options */
+
+/*
+ * A choice between a few things, each with a reason to pick it. The card is the
+ * label, so the whole thing is the target rather than a circle the width of a
+ * fingertip's edge — which is the difference between a deposit and a mis-tap on
+ * a phone held one-handed.
+ */
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    border: none;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-panel);
+    color: var(--color-ink);
+    cursor: pointer;
+}
+
+/*
+ * The chosen card carries the state, not just the radio inside it: :has() lets
+ * the styling follow the form's own answer, so nothing has to be kept in step
+ * by a script.
+ */
+.option:has(.option__radio:checked) {
+    border-color: var(--color-primary);
+    border-width: var(--border-width-strong);
+    background-color: var(--color-primary-soft);
+}
+
+.option:has(.option__radio:focus-visible) {
+    outline: var(--border-width-strong) solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+.option__radio {
+    flex: none;
+    width: var(--radio-size);
+    height: var(--radio-size);
+    margin: 0;
+    accent-color: var(--color-primary);
+}
+
+.option__text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.option__title {
+    font-weight: var(--weight-bold);
+}
+
+.option__detail {
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+}
+
+/* The icon is a hint at the end of the row, so it takes the muted weight. */
+.option .icon {
+    color: var(--color-ink);
+}
+
+/*
+ * For a label a screen reader should read and a screen should not show — the
+ * legend on a group of options whose question is already the heading above it.
+ */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ---------------------------------------------------------------- headline */
+
+/*
+ * The figure a screen is asking somebody to agree to. Big on purpose: the one
+ * mistake that matters here is confirming a different number from the one you
+ * meant.
+ */
+.headline-amount {
+    font-size: 2.25rem;
+    font-weight: var(--weight-bold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+/* ----------------------------------------------------------------- receipt */
+
+.receipt-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    text-align: center;
+}
+
+/* Green, small and above the amount: the answer to "did it go through?". */
+.receipt-head__status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    color: var(--color-primary);
+    font-weight: var(--weight-semibold);
+}
+
+/*
+ * Share and Download, which are alternatives rather than a choice and its
+ * second thought — so they sit beside each other rather than stacked.
+ */
+.screen__actions--side-by-side {
+    flex-direction: row;
+}
+
+.screen__actions--side-by-side > * {
+    flex: 1 1 0;
+}
+
+/* Hidden until share.js knows which of the two things this button can do. */
+.share {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+/* ----------------------------------------------------------------- closing */
+
+/*
+ * The button for the one thing on this site that cannot be undone. Red because
+ * it is destructive, and full width like every other primary action because
+ * making it small would not make it safer — the checkbox above it does that.
+ */
+.button--danger {
+    background-color: var(--color-danger);
+    border-color: var(--color-danger);
+    color: var(--color-on-primary);
+}
+
+.link--danger {
+    color: var(--color-danger);
+}
+
+/* The lock on 5.3c, which opens something rather different from a payment. */
+.done__mark--danger {
+    color: var(--color-danger);
+}
+
+/* A link with its own icon, like "Download statements". */
+.link--iconed {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* -------------------------------------------------------------------- note */
+
+/*
+ * What is about to happen, stated before the button that does it. Information,
+ * not a warning — so it is quiet blue rather than red, and it is an <aside>
+ * because it is beside the flow rather than part of it.
+ */
+.note {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-control);
+    background-color: var(--color-info-soft);
+    color: var(--color-info);
+    font-size: var(--text-caption);
+    line-height: var(--leading-normal);
+}
+
+/* All clear, said in the colour of a pass. */
+.note--good {
+    background-color: var(--color-primary-soft);
+    color: var(--color-primary-strong);
+}
+
+/* A refusal, in the provider's own words. */
+.note--error {
+    background-color: var(--color-danger-soft);
+    color: var(--color-danger);
+}
+
+/*
+ * Something to check before continuing — an account never paid before. Amber
+ * rather than red: nothing has gone wrong, and a customer who meets red on a
+ * screen where they have made no mistake learns to read past it.
+ */
+.note--warning {
+    background-color: var(--color-warning-soft);
+    color: var(--color-warning);
+}
+
+/* ------------------------------------------------------------------ advice */
+
+/*
+ * What to do differently next time, set apart from the refusal above it: the red
+ * box says what happened, and this says what to do — two different jobs, and
+ * running them together makes both harder to read.
+ */
+.advice {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.advice__title {
+    margin: 0;
+    font-size: var(--text-label);
+    font-weight: var(--weight-bold);
+}
+
+.advice__detail {
+    color: var(--color-ink-muted);
+}
+
+/* -------------------------------------------------------------- checkboxes */
+
+.checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+}
+
+/*
+ * Sized in the stylesheet rather than left at the browser's 13px, because this
+ * one carries a legal agreement and has to be a target a thumb can hit.
+ */
+.checkbox__control {
+    flex: none;
+    width: var(--checkbox-size);
+    height: var(--checkbox-size);
+    margin: 0;
+    accent-color: var(--color-primary);
+}
+
+.checkbox__label {
+    font-size: var(--text-caption);
+    line-height: var(--leading-normal);
+}
+
+.checkbox--invalid .checkbox__control {
+    outline: var(--border-width-strong) solid var(--color-danger);
+    outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------- links */
+
+.link {
+    color: var(--color-primary);
+    font-weight: var(--weight-semibold);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+/*
+ * A button that has to look like a link: resending sends a text message, so it
+ * is a POST and cannot be an anchor, but it sits beside one and reads as the
+ * same kind of thing.
+ */
+.link-button {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-primary);
+    font: inherit;
+    font-weight: var(--weight-semibold);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+}
+
+.is-hidden {
+    display: none;
+}
+
+/* ------------------------------------------------------------------ alerts */
+
+/*
+ * For the refusals that belong to no single field: a National ID already in
+ * use, or details the register does not recognise. Both were answered on an
+ * earlier screen, so the message goes where the customer will read it before
+ * reaching for the button again.
+ */
+.alert {
+    padding: var(--space-4);
+    border-radius: var(--radius-control);
+    font-size: var(--text-caption);
+}
+
+/* Something that happened, not something that went wrong. */
+.alert--info {
+    background-color: var(--color-info-soft);
+    color: var(--color-info);
+}
+
+.alert--error {
+    background-color: var(--color-danger-soft);
+    color: var(--color-danger);
+}
+
+/* The line under the last button: an offer, not an action. */
+.screen__footnote {
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+    text-align: center;
+}
+
+/* ------------------------------------------------------------------- brand */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.brand__mark {
+    display: grid;
+    place-items: center;
+    width: var(--tap-target);
+    height: var(--tap-target);
+    border-radius: var(--radius-mark);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    font-size: var(--text-body);
+    font-weight: var(--weight-bold);
+}
+
+/*
+ * On the login screen the mark stands alone and larger: there is no wordmark
+ * beside it to carry the name, so the mark has to.
+ */
+.brand__mark--large {
+    width: var(--brand-mark-large);
+    height: var(--brand-mark-large);
+    border-radius: var(--radius-panel);
+    font-size: var(--text-heading);
+}
+
+.brand__name {
+    font-size: 1.375rem;
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.01em;
+}
+
+/* ------------------------------------------------------------ illustration */
+
+/*
+ * A labelled hole in the layout. It is dashed on purpose: it reads as "artwork
+ * goes here" to everyone who sees it, so nobody ships it by accident thinking
+ * it is the design.
+ */
+.illustration {
+    display: grid;
+    place-items: center;
+    min-height: 17rem;
+    padding: var(--space-6);
+    border: var(--border-width) dashed var(--color-border-dashed);
+    border-radius: var(--radius-panel);
+    background-color: var(--color-surface);
+}
+
+/* Real artwork: the dashed placeholder frame comes off. */
+.illustration--art {
+    min-height: 0;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+}
+
+/*
+ * Decorative, so alt="" in the markup: the heading beside it says the same
+ * thing. width/height attributes reserve the space before the file loads; this
+ * lets it scale down with the screen.
+ */
+.illustration__image {
+    display: block;
+    width: 100%;
+    max-width: 22rem;
+    height: auto;
+}
+
+.illustration__caption {
+    max-width: 22rem;
+    color: var(--color-ink-subtle);
+    font-size: var(--text-caption);
+    text-align: center;
+}
+
+/* ----------------------------------------------------------------- buttons */
+
+/*
+ * Anchors and buttons share this, because a link that goes somewhere and a
+ * button that does something look identical in the mocks and should stay that
+ * way when a screen swaps one for the other.
+ */
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--control-height);
+    padding: var(--space-3) var(--space-5);
+    border: var(--border-width) solid transparent;
+    border-radius: var(--radius-control);
+    font-family: inherit;
+    font-size: var(--text-action);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.button--primary {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.button--secondary {
+    background-color: var(--color-canvas);
+    border-color: var(--color-border-strong);
+    color: var(--color-ink);
+}
+
+@media (hover: hover) {
+    .button--primary:hover {
+        background-color: var(--color-primary-strong);
+    }
+
+    .button--secondary:hover {
+        background-color: var(--color-surface);
+    }
+}
+
+/*
+ * Only ever set by a script that can also unset it. A button the server rendered
+ * disabled would be a customer unable to correct the thing that disabled it.
+ */
+.button:disabled {
+    background-color: var(--color-surface);
+    border-color: transparent;
+    color: var(--color-ink-subtle);
+    cursor: not-allowed;
+}
+
+.button:active {
+    transition: none;
+}
+
+.button--primary:active {
+    background-color: var(--color-primary-strong);
+}
+
+.button--secondary:active {
+    background-color: var(--color-surface);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button {
+        transition: none;
+    }
+}
+
+/* ------------------------------------------------------- wider than a phone */
+
+/*
+ * A phone screen stretched to a desktop viewport is not a desktop layout: the
+ * growing middle that puts the button under a thumb turns into a hand's width
+ * of nothing between the text and the actions.
+ *
+ * So above this breakpoint the screen stops being viewport-tall and becomes
+ * what it is — one phone screen — sitting on a tinted page as a card. The
+ * layout inside it does not change, which is the point: there is one design
+ * here, not two.
+ */
+@media (min-width: 40rem) {
+    body.page {
+        display: grid;
+        place-items: center;
+        padding: var(--space-10) var(--space-4);
+        background-color: var(--color-surface);
+    }
+
+    .screen {
+        min-height: 0;
+        width: 100%;
+        padding: var(--space-8);
+        border: var(--border-width) solid var(--color-border);
+        border-radius: var(--radius-panel);
+        background-color: var(--color-canvas);
+        box-shadow: var(--shadow-card);
+    }
+
+    /* No slack to take up: the actions sit under the content, not a screen away. */
+    .screen__body {
+        flex: 0 1 auto;
+    }
+
+    /* The tab bar belongs to the card, not to the window it is sitting in. */
+    .screen--tabbed {
+        position: relative;
+        padding-bottom: calc(var(--tabs-height) + var(--space-6));
+    }
+
+    .tabs {
+        position: absolute;
+        border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+    }
+}

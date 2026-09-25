@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!--/* docs/screens/6.5 Loan account */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Loan account</title>
+</head>
+<body>
+<main class="screen screen--tabbed">
+
+    <div class="screen__body">
+
+        <h1 class="screen__title">Loan account</h1>
+
+        <section class="loan-card">
+            <div class="loan-card__head">
+                <p class="loan-card__label">Amount owed</p>
+                <span class="badge" th:classappend="|badge--${loan.statusTone}|"
+                      th:text="${loan.status}">Active</span>
+            </div>
+            <p class="loan-card__amount" th:text="${loan.owed}">KES 10,700.00</p>
+            <p class="loan-card__due">
+                Due <strong th:text="${loan.dueDate}">22 Oct 2026</strong>
+            </p>
+
+            <!--/*
+              A bar rather than a second figure: "how much is left" is the question,
+              and a length answers it before a number does. Hidden from a screen
+              reader, which gets the sentence under it instead.
+            */-->
+            <div class="progress-bar" aria-hidden="true">
+                <span class="progress-bar__fill" th:style="|width: ${loan.progress}%|"></span>
+            </div>
+            <p class="loan-card__note" th:text="|${loan.repaid} repaid so far|">KES 0.00 repaid so far</p>
+        </section>
+
+        <section class="summary">
+            <dl class="summary__rows summary__rows--boxed">
+                <div class="summary__row">
+                    <dt class="summary__label">Loan number</dt>
+                    <dd class="summary__value" th:text="${loan.number}">LN 2004 5561</dd>
+                </div>
+                <div class="summary__row">
+                    <dt class="summary__label">Borrowed</dt>
+                    <dd class="summary__value" th:text="${loan.borrowed}">KES 10,000.00</dd>
+                </div>
+                <div class="summary__row">
+                    <dt class="summary__label">Paid out</dt>
+                    <dd class="summary__value" th:text="${loan.paidOutAt}">22 Sep 2026, 11:02</dd>
+                </div>
+                <div class="summary__row" th:if="${into}">
+                    <dt class="summary__label">Linked to</dt>
+                    <dd class="summary__value" th:text="${into}">Main account ••••3310</dd>
+                </div>
+            </dl>
+        </section>
+
+        <!--/*
+          The loan's own events, not the statement: the customer statement view
+          deliberately leaves loan accounts out, and what belongs here is what
+          happened to the loan — paid out, and each repayment as it lands.
+        */-->
+        <section class="activity">
+            <h2 class="activity__title">Activity</h2>
+            <ul class="activity__list">
+                <li class="activity__item">
+                    <span class="activity__badge" aria-hidden="true">
+                        <svg th:replace="~{fragments/icons :: card}"></svg>
+                    </span>
+                    <span class="activity__text">
+                        <span class="activity__description">Loan paid out</span>
+                        <span class="activity__when" th:text="${loan.paidOutAt}">22 Sep 2026, 11:02</span>
+                    </span>
+                    <span class="activity__amount activity__amount--in"
+                          th:text="${loan.paidOut}">+10,000.00</span>
+                </li>
+            </ul>
+        </section>
+
+    </div>
+
+    <nav th:replace="~{fragments/screen :: tabs('loans')}"></nav>
+
+</main>
+</body>
+</html>

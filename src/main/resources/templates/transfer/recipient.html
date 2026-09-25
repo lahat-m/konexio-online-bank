@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.3a Recipient */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Send money</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Send money', @{/dashboard})}"></header>
+
+    <form class="screen__form" method="post" th:action="@{/transfers}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">Who are you sending to?</h1>
+            <p class="screen__lead">
+                Enter a Konexio account number. We'll show you the account name before you send.
+            </p>
+
+            <div class="field" th:classappend="${recipientError} ? 'field--invalid'">
+                <label class="field__label" for="accountNumber">Recipient account number</label>
+                <input class="field__control" type="text" id="accountNumber" name="accountNumber"
+                       th:value="${typedAccountNumber}" placeholder="1002 0000 0000"
+                       inputmode="numeric" autocomplete="off" enterkeyhint="search"
+                       aria-describedby="accountNumberHint">
+                <p class="field__error field__error--iconed" th:if="${recipientError}" role="alert">
+                    <svg th:replace="~{fragments/icons :: alert}"></svg>
+                    <span th:text="${recipientError}">A Konexio account number is 12 digits</span>
+                </p>
+                <p class="field__hint" id="accountNumberHint">
+                    12 digits, found in the recipient's app or statement.
+                </p>
+            </div>
+
+            <!--/*
+              People this customer has already paid. Absent rather than empty for
+              somebody who has never sent money: a heading over nothing is worse
+              than no heading.
+            */-->
+            <section class="people" th:unless="${recent.isEmpty()}">
+                <h2 class="people__title">Recent</h2>
+                <ul class="people__list">
+                    <li th:each="person : ${recent}">
+                        <!--/*
+                          A submit button, not a link: choosing somebody is the same
+                          action as typing their number and pressing Find account, so
+                          it goes through the same handler with the same CSRF token.
+                        */-->
+                        <button class="person" type="submit" name="accountNumber"
+                                th:value="${person.accountNumber}">
+                            <span class="avatar" aria-hidden="true" th:text="${person.initials}">GM</span>
+                            <span class="person__text">
+                                <span class="person__name" th:text="${person.maskedName}">GRACE MU***</span>
+                                <span class="person__account"
+                                      th:text="|Konexio ${person.maskedAccountNumber}|">Konexio ••••0981</span>
+                            </span>
+                            <svg th:replace="~{fragments/icons :: chevron-right}"></svg>
+                        </button>
+                    </li>
+                </ul>
+            </section>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Find account</button>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

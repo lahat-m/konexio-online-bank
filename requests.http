@@ -11,7 +11,7 @@
 
 # Filled in by hand from the app log, as described above.
 @otp = 288673
-@depositReference = ws_CO_520819971600
+@depositReference = ws_CO_758852013236
 @withdrawalReference = AG_692526302181
 
 # Step 4 sends money to this account. Use the accountNumber of any other open

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!--/* docs/screens/0.8 Account created */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Your account is ready</title>
+</head>
+<body>
+<!--/* No header and no way back: the sign-up is over, and there is nothing behind this. */-->
+<main class="screen">
+
+    <div class="screen__body">
+        <div class="done">
+            <span class="done__badge">
+                <svg th:replace="~{fragments/icons :: check}"></svg>
+            </span>
+            <h1 class="screen__title done__title">Your account is ready</h1>
+            <p class="screen__lead done__lead" th:text="|Welcome to Konexio, ${firstName}.|">
+                Welcome to Konexio, Amina.
+            </p>
+        </div>
+
+        <!--/*
+          The one screen that shows an account number in full: the customer has to
+          be able to read it out to be paid, and it is theirs.
+        */-->
+        <section class="account-card">
+            <p class="account-card__label">Main account</p>
+            <div class="account-card__number-row">
+                <p class="account-card__number" th:text="${accountNumberGrouped}">1002 4587 3310</p>
+                <button class="copy" type="button" th:attr="data-copy=${accountNumber}">Copy</button>
+            </div>
+            <div class="account-card__row">
+                <span class="account-card__label">Balance</span>
+                <span class="account-card__balance" th:text="${balance}">KES 0.00</span>
+            </div>
+        </section>
+    </div>
+
+    <nav class="screen__actions">
+        <a class="button button--primary" th:href="@{/deposits}">Make your first deposit</a>
+        <a class="button button--secondary" th:href="@{/dashboard}">Go to dashboard</a>
+    </nav>
+
+    <script th:src="@{/js/copy.js}" defer></script>
+
+</main>
+</body>
+</html>

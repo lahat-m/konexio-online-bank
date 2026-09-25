@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.1b Amount */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>How much?</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header(${channelTitle}, @{/deposits})}"></header>
+
+    <form class="screen__form" method="post" th:action="@{/deposits/amount}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">How much?</h1>
+
+            <div class="alert alert--error" th:if="${amountError}" role="alert">
+                <p th:text="${amountError}"></p>
+            </div>
+
+            <div class="field" th:classappend="${amountError} ? 'field--invalid'">
+                <label class="field__label" for="amount">Amount</label>
+                <div class="amount-field">
+                    <span class="amount-field__currency">KES</span>
+                    <input class="amount-field__input" type="text" id="amount" name="amount"
+                           th:value="${typedAmount}" inputmode="decimal" autocomplete="off"
+                           enterkeyhint="done" autofocus>
+                </div>
+
+                <!--/*
+                  Only when a limit has actually been approved. An unconfigured
+                  environment has none, and a range nobody signed off is not
+                  something to promise a customer.
+                */-->
+                <p class="field__hint" th:if="${limits}"
+                   th:text="|You can deposit ${limits.minimum} to ${limits.maximum} at a time.|">
+                    You can deposit KES 100.00 to KES 150,000.00 at a time.
+                </p>
+            </div>
+
+            <!--/*
+              One tap instead of a keypad. Hidden until amount.js wires them,
+              because a pill that cannot fill the field is a button that does
+              nothing — the field above is the way in either way.
+            */-->
+            <div class="pills">
+                <button class="pill" type="button" th:each="quick : ${quickAmounts}"
+                        th:attr="data-amount=${quick}"
+                        th:text="${#numbers.formatDecimal(quick, 1, 'COMMA', 0, 'POINT')}">5,000</button>
+            </div>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Continue</button>
+        </nav>
+
+    </form>
+
+    <script th:src="@{/js/amount.js}" defer></script>
+
+</main>
+</body>
+</html>

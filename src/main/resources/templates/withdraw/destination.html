@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.2a Destination */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Withdraw</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Withdraw', @{/dashboard})}"></header>
+
+    <form class="screen__form" method="post" th:action="@{/withdrawals}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">Where should the money go?</h1>
+            <!--/*
+              The balance, not a limit: a withdrawal spends what is there, so what
+              is there is the first thing worth knowing.
+            */-->
+            <p class="screen__lead" th:text="|Available balance: ${account.balance}|">
+                Available balance: KES 24,500.00
+            </p>
+
+            <div class="alert alert--error" th:if="${destinationError}" role="alert">
+                <p th:text="${destinationError}"></p>
+            </div>
+
+            <fieldset class="options">
+                <legend class="visually-hidden">Where the money should go</legend>
+
+                <label class="option">
+                    <input class="option__radio" type="radio" name="channel" value="MPESA"
+                           th:checked="${channel.name() == 'MPESA'}">
+                    <span class="option__text">
+                        <span class="option__title">M-Pesa</span>
+                        <span class="option__detail" th:if="${phoneMasked}"
+                              th:text="|Send to ${phoneMasked}|">Send to +254 7•• ••• 312</span>
+                    </span>
+                    <svg th:replace="~{fragments/icons :: phone}"></svg>
+                </label>
+
+                <label class="option">
+                    <input class="option__radio" type="radio" name="channel" value="AGENT"
+                           th:checked="${channel.name() == 'AGENT'}">
+                    <span class="option__text">
+                        <span class="option__title">Cash at an agent</span>
+                        <span class="option__detail">Get a code to collect cash</span>
+                    </span>
+                    <svg th:replace="~{fragments/icons :: store}"></svg>
+                </label>
+            </fieldset>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Continue</button>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

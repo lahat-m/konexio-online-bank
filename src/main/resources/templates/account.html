@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!--/* docs/screens/5.2 Account details */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${account.title}">Savings account</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header(${account.title}, @{/accounts})}"></header>
+
+    <div class="screen__body">
+
+        <div>
+            <p class="field__label">Balance</p>
+            <p class="headline-amount" th:text="${account.balance}">KES 1,200.00</p>
+        </div>
+
+        <!--/*
+          What to do about it, not only that it is true: a dormant account is
+          woken by using it, and the two ways to use it are the buttons below.
+        */-->
+        <aside class="note note--warning" th:if="${account.dormant}">
+            <svg th:replace="~{fragments/icons :: alert}"></svg>
+            <span>
+                This account is dormant. Make a deposit or transfer to reactivate it,
+                or close it if you no longer need it.
+            </span>
+        </aside>
+
+        <section class="summary">
+            <dl class="summary__rows summary__rows--boxed">
+                <div class="summary__row">
+                    <dt class="summary__label">Account number</dt>
+                    <dd class="summary__value" th:text="${account.number}">1002 1190 0457</dd>
+                </div>
+                <div class="summary__row">
+                    <dt class="summary__label">Type</dt>
+                    <dd class="summary__value" th:text="${account.type}">Savings</dd>
+                </div>
+                <div class="summary__row">
+                    <dt class="summary__label">Opened</dt>
+                    <dd class="summary__value" th:text="${account.opened}">3 Mar 2023</dd>
+                </div>
+                <div class="summary__row">
+                    <dt class="summary__label">Last activity</dt>
+                    <dd class="summary__value" th:text="${account.lastActivity}">14 Aug 2025</dd>
+                </div>
+                <div class="summary__row">
+                    <dt class="summary__label">Status</dt>
+                    <dd class="summary__value" th:text="${account.status}">Dormant</dd>
+                </div>
+            </dl>
+        </section>
+
+        <nav class="screen__actions screen__actions--side-by-side" th:unless="${account.closed}">
+            <a class="button button--secondary" th:href="@{/transfers}">Transfer out</a>
+            <a class="button button--secondary" th:href="@{/deposits}">Deposit</a>
+        </nav>
+
+    </div>
+
+    <!--/*
+      Away from everything else and in the colour of what it does. A loan account
+      is not the customer's to close, and a closed one has nothing left to do.
+    */-->
+    <nav class="screen__actions" th:if="${account.closeable}">
+        <p class="screen__footnote">
+            <a class="link link--danger" th:href="@{/accounts/{id}/closure(id=${account.id})}">
+                Close this account
+            </a>
+        </p>
+    </nav>
+
+</main>
+</body>
+</html>

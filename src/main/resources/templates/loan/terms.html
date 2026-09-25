@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!--/* docs/screens/6.2 Summary & terms */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Loan details</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Loan details', @{/loans})}"></header>
+
+    <form class="screen__form" method="post"
+          th:action="@{/loans/offers/{id}(id=${offer.id})}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">Your loan at a glance</h1>
+
+            <section class="summary">
+                <dl class="summary__rows summary__rows--boxed">
+                    <div class="summary__row">
+                        <dt class="summary__label">Loan amount</dt>
+                        <dd class="summary__value" th:text="${offer.principal}">KES 10,000.00</dd>
+                    </div>
+                    <!--/* The rate is here to explain the figure beside it, not instead of it. */-->
+                    <div class="summary__row">
+                        <dt class="summary__label"
+                            th:text="${offer.rate} ? |Interest (${offer.rate}%)| : 'Interest'">Interest (5%)</dt>
+                        <dd class="summary__value" th:text="${offer.interest}">KES 500.00</dd>
+                    </div>
+                    <div class="summary__row">
+                        <dt class="summary__label">Processing fee</dt>
+                        <dd class="summary__value" th:text="${offer.fee}">KES 200.00</dd>
+                    </div>
+                    <div class="summary__row">
+                        <dt class="summary__label">Due date</dt>
+                        <dd class="summary__value" th:text="${offer.dueDate}">22 Oct 2026</dd>
+                    </div>
+                    <div class="summary__row" th:if="${into}">
+                        <dt class="summary__label">Paid into</dt>
+                        <dd class="summary__value" th:text="${into}">Main account ••••3310</dd>
+                    </div>
+                    <div class="summary__row summary__row--total">
+                        <dt class="summary__label summary__label--strong">Total to repay</dt>
+                        <dd class="summary__value" th:text="${offer.total}">KES 10,700.00</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <!--/*
+              What late actually means here, rather than a policy the bank does not
+              have: the loan is marked overdue and reported. No penalty is charged,
+              so none is promised.
+            */-->
+            <aside class="note">
+                <svg th:replace="~{fragments/icons :: info}"></svg>
+                <span>
+                    If you repay late: the loan is marked overdue and reported to the credit
+                    bureau, which can affect your ability to borrow again.
+                </span>
+            </aside>
+
+            <div class="checkbox" th:classappend="${termsError} ? 'checkbox--invalid'">
+                <input class="checkbox__control" type="checkbox" id="termsAccepted" name="termsAccepted"
+                       value="true" th:checked="${loanForm.termsAccepted}">
+                <label class="checkbox__label" for="termsAccepted">
+                    I've read and accept the <a class="link" th:href="@{/loan-terms}">loan terms</a>.
+                </label>
+            </div>
+            <p class="field__error field__error--iconed" th:if="${termsError}" role="alert">
+                <svg th:replace="~{fragments/icons :: alert}"></svg>
+                <span th:text="${termsError}">Tick the box to accept the loan terms</span>
+            </p>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit"
+                    th:text="|Accept and get ${offer.terse}|">Accept and get KES 10,000</button>
+            <a class="button button--secondary" th:href="@{/dashboard}">Not now</a>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

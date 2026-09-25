@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!--/* docs/screens/0.6 Set PIN */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create a PIN</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Create account', @{/register/verify})}"></header>
+    <div th:replace="~{fragments/screen :: progress(4, 4, 'Secure your account')}"></div>
+
+    <form class="screen__form" method="post" th:action="@{/register/pin}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title" th:text="|Create a ${pinLength}-digit PIN|">Create a 4-digit PIN</h1>
+            <p class="screen__lead">
+                You'll use it to log in and approve transactions.
+                Avoid easy ones like 1234 or your birth year.
+            </p>
+
+            <div class="alert alert--error" th:if="${pinError}" role="alert">
+                <p th:text="${pinError}"></p>
+            </div>
+
+            <!--/*
+              The keypad is a script's work, so the field comes first and the
+              keypad is hidden until one has wired it up. Without a script the
+              customer types their PIN into an ordinary field with their own
+              keyboard; with one, they get the screen in the mock. Either way it
+              is the same input that submits.
+            */-->
+            <div class="pin" th:attr="data-pin-length=${pinLength}">
+
+                <div class="pin__dots" aria-hidden="true">
+                    <span class="pin__dot" th:each="position : ${#numbers.sequence(1, pinLength)}"></span>
+                </div>
+
+                <div class="field" th:classappend="${pinError} ? 'field--invalid'">
+                    <label class="field__label pin__label" for="pin">Your PIN</label>
+                    <input class="field__control pin__input" type="password" id="pin" name="pin"
+                           th:attr="maxlength=${pinLength}"
+                           inputmode="numeric" autocomplete="new-password" enterkeyhint="done">
+                </div>
+
+                <div class="keypad">
+                    <button class="keypad__key" type="button" th:each="digit : ${#numbers.sequence(1, 9)}"
+                            th:text="${digit}" th:attr="data-digit=${digit}">1</button>
+                    <span class="keypad__spacer"></span>
+                    <button class="keypad__key" type="button" data-digit="0">0</button>
+                    <button class="keypad__key keypad__key--quiet" type="button" data-action="delete"
+                            aria-label="Delete last digit">
+                        <svg th:replace="~{fragments/icons :: backspace}"></svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Continue</button>
+        </nav>
+
+    </form>
+
+    <script th:src="@{/js/pin.js}" defer></script>
+
+</main>
+</body>
+</html>

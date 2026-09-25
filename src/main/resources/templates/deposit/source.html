@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.1a Source */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Deposit</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Deposit', @{/dashboard})}"></header>
+
+    <form class="screen__form" method="post" th:action="@{/deposits}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">How do you want to deposit?</h1>
+            <p class="screen__lead"
+               th:text="|Money goes into your main account ${account.maskedNumber}.|">
+                Money goes into your main account ••••3310.
+            </p>
+
+            <div class="alert alert--error" th:if="${sourceError}" role="alert">
+                <p th:text="${sourceError}"></p>
+            </div>
+
+            <!--/*
+              Radios in cards, so the whole card is the target rather than a
+              circle the width of a fingertip's edge. Which one is chosen is the
+              radio's business; the card follows it in CSS.
+            */-->
+            <fieldset class="options">
+                <legend class="visually-hidden">Where the money is coming from</legend>
+
+                <label class="option">
+                    <input class="option__radio" type="radio" name="channel" value="MPESA"
+                           th:checked="${channel.name() == 'MPESA'}">
+                    <span class="option__text">
+                        <span class="option__title">M-Pesa</span>
+                        <span class="option__detail" th:if="${phoneMasked}"
+                              th:text="|Pay from ${phoneMasked}|">Pay from +254 7•• ••• 312</span>
+                    </span>
+                    <svg th:replace="~{fragments/icons :: phone}"></svg>
+                </label>
+
+                <label class="option">
+                    <input class="option__radio" type="radio" name="channel" value="CARD"
+                           th:checked="${channel.name() == 'CARD'}">
+                    <span class="option__text">
+                        <span class="option__title">Debit card</span>
+                        <span class="option__detail">Visa or Mastercard</span>
+                    </span>
+                    <svg th:replace="~{fragments/icons :: card}"></svg>
+                </label>
+
+                <label class="option">
+                    <input class="option__radio" type="radio" name="channel" value="AGENT"
+                           th:checked="${channel.name() == 'AGENT'}">
+                    <span class="option__text">
+                        <span class="option__title">Cash at an agent</span>
+                        <span class="option__detail">Hand cash to a Konexio agent</span>
+                    </span>
+                    <svg th:replace="~{fragments/icons :: store}"></svg>
+                </label>
+            </fieldset>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Continue</button>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

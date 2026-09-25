@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<!--/* docs/screens/0.1 Welcome */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Konexio</title>
+</head>
+<body>
+<main class="screen">
+
+    <header class="brand">
+        <span class="brand__mark" aria-hidden="true">K</span>
+        <span class="brand__name">Konexio</span>
+    </header>
+
+    <div class="screen__body">
+        <div class="illustration illustration--art">
+            <img class="illustration__image" th:src="@{/images/onlinebanking-icon.svg}"
+                 src="/images/onlinebanking-icon.svg" width="800" height="552" alt="">
+        </div>
+
+        <h1 class="screen__title">A bank account you can open in minutes</h1>
+        <p class="screen__lead">Deposit, withdraw, send money and get a loan, all from your phone.</p>
+    </div>
+
+    <nav class="screen__actions">
+        <a class="button button--primary" th:href="@{/register}">Create account</a>
+        <a class="button button--secondary" th:href="@{/login}">Log in</a>
+    </nav>
+
+</main>
+</body>
+</html>

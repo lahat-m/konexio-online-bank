@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!--/* docs/screens/6.3 PIN */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Enter your PIN</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Loan details', @{/loans/offers/{id}(id=${offer.id})})}"></header>
+
+    <form class="screen__form" method="post"
+          th:action="@{/loans/offers/{id}/pin(id=${offer.id})}" novalidate>
+
+        <div class="screen__body">
+            <div class="done">
+                <span class="done__mark">
+                    <svg th:replace="~{fragments/icons :: lock}"></svg>
+                </span>
+                <h1 class="screen__title done__title">Enter your PIN</h1>
+                <p class="screen__lead done__lead"
+                   th:text="${into} ? |To accept a loan of ${offer.principal} into your ${into}|
+                                    : |To accept a loan of ${offer.principal}|">
+                    To accept a loan of KES 10,000.00 into your main account
+                </p>
+            </div>
+
+            <div class="alert alert--error" th:if="${pinError}" role="alert">
+                <p th:text="${pinError}"></p>
+            </div>
+
+            <!--/* The same keypad as every other flow that ends in money moving. */-->
+            <div class="pin" th:attr="data-pin-length=${pinLength}">
+
+                <div class="pin__dots" aria-hidden="true">
+                    <span class="pin__dot" th:each="position : ${#numbers.sequence(1, pinLength)}"></span>
+                </div>
+
+                <div class="field" th:classappend="${pinError} ? 'field--invalid'">
+                    <label class="field__label pin__label" for="pin">Your PIN</label>
+                    <input class="field__control pin__input" type="password" id="pin" name="pin"
+                           th:attr="maxlength=${pinLength}"
+                           inputmode="numeric" autocomplete="current-password" enterkeyhint="done">
+                </div>
+
+                <div class="keypad">
+                    <button class="keypad__key" type="button" th:each="digit : ${#numbers.sequence(1, 9)}"
+                            th:text="${digit}" th:attr="data-digit=${digit}">1</button>
+                    <span class="keypad__spacer"></span>
+                    <button class="keypad__key" type="button" data-digit="0">0</button>
+                    <button class="keypad__key keypad__key--quiet" type="button" data-action="delete"
+                            aria-label="Delete last digit">
+                        <svg th:replace="~{fragments/icons :: backspace}"></svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Accept loan</button>
+            <p class="screen__footnote">
+                <a class="link" th:href="@{/forgot-pin}">Forgot PIN?</a>
+            </p>
+        </nav>
+
+    </form>
+
+    <script th:src="@{/js/pin.js}" defer></script>
+
+</main>
+</body>
+</html>

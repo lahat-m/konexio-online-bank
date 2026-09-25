@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.2b Amount (error state) */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>How much?</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header(${channelTitle}, @{/withdrawals})}"></header>
+
+    <form class="screen__form" method="post" th:action="@{/withdrawals/amount}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">How much?</h1>
+
+            <div class="field" th:classappend="${amountError} ? 'field--invalid'">
+                <label class="field__label" for="amount">Amount</label>
+                <!--/*
+                  data-available is what the balance is, so the script can say
+                  "more than you have" while the number is still being typed. The
+                  server checks it again, and the ledger checks it last.
+                */-->
+                <div class="amount-field">
+                    <span class="amount-field__currency"
+                          th:text="${account} ? ${account.balance.currency} : 'KES'">KES</span>
+                    <input class="amount-field__input" type="text" id="amount" name="amount"
+                           th:value="${typedAmount}"
+                           th:attr="data-available=${account} ? ${account.balance.amount} : null"
+                           inputmode="decimal" autocomplete="off" enterkeyhint="done" autofocus>
+                </div>
+
+                <!--/* Under the field, with an icon: it is about the number above it. */-->
+                <p class="field__error field__error--iconed" th:if="${amountError}" role="alert">
+                    <svg th:replace="~{fragments/icons :: alert}"></svg>
+                    <span th:text="${amountError}">
+                        That is more than your available balance of KES 24,500.00. Enter a smaller amount.
+                    </span>
+                </p>
+
+                <p class="field__hint" th:if="${limits}"
+                   th:text="|You can withdraw ${limits.minimum} to ${limits.maximum} at a time.|">
+                    You can withdraw KES 100.00 to KES 50,000.00 at a time.
+                </p>
+            </div>
+
+            <div class="pills">
+                <button class="pill" type="button" th:each="quick : ${quickAmounts}"
+                        th:attr="data-amount=${quick}"
+                        th:text="${#numbers.formatDecimal(quick, 1, 'COMMA', 0, 'POINT')}">2,000</button>
+            </div>
+        </div>
+
+        <nav class="screen__actions">
+            <!--/*
+              Never disabled from the server. The mock shows it greyed out while
+              the amount is wrong, which amount.js does live; if the script never
+              runs, the button has to stay usable or a customer who typed too much
+              could not correct it and try again.
+            */-->
+            <button class="button button--primary" type="submit">Continue</button>
+        </nav>
+
+    </form>
+
+    <script th:src="@{/js/amount.js}" defer></script>
+
+</main>
+</body>
+</html>

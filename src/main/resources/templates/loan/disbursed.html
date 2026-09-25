@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!--/* docs/screens/6.4 Disbursed */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Loan paid out</title>
+</head>
+<body>
+<!--/* No header and no way back: the money has moved. */-->
+<main class="screen">
+
+    <div class="screen__body">
+        <div class="done">
+            <span class="done__mark">
+                <svg th:replace="~{fragments/icons :: check}"></svg>
+            </span>
+
+            <!--/* Where the money is, not what the bank did: that is the news. */-->
+            <h1 class="screen__title done__title" th:text="|${loan.borrowed} is in your account|">
+                KES 10,000.00 is in your account
+            </h1>
+            <p class="screen__lead done__lead"
+               th:text="${into} ? |We opened loan account ${loan.number} and linked it to your ${into}.|
+                                : |We opened loan account ${loan.number}.|">
+                We opened loan account LN 2004 5561 and linked it to your main account ••••3310.
+            </p>
+        </div>
+
+        <section class="summary">
+            <dl class="summary__rows summary__rows--boxed">
+                <div class="summary__row" th:if="${balance}">
+                    <dt class="summary__label">Main account balance</dt>
+                    <dd class="summary__value" th:text="${balance}">KES 24,500.00</dd>
+                </div>
+                <div class="summary__row">
+                    <dt class="summary__label">Loan owed</dt>
+                    <dd class="summary__value" th:text="${loan.owed}">KES 10,700.00</dd>
+                </div>
+                <div class="summary__row">
+                    <dt class="summary__label">Due date</dt>
+                    <dd class="summary__value" th:text="${loan.dueDate}">22 Oct 2026</dd>
+                </div>
+                <div class="summary__row" th:if="${loan.reference}">
+                    <dt class="summary__label">Reference</dt>
+                    <dd class="summary__value" th:text="${loan.reference}">KNX-LN-260922-0112</dd>
+                </div>
+            </dl>
+        </section>
+    </div>
+
+    <nav class="screen__actions">
+        <a class="button button--primary" th:href="@{/loans/{id}(id=${loan.id})}">View loan account</a>
+        <a class="button button--secondary" th:href="@{/dashboard}">Go home</a>
+    </nav>
+
+</main>
+</body>
+</html>

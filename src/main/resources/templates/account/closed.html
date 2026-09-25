@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!--/* docs/screens/5.3d Closed */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Account closed</title>
+</head>
+<body>
+<!--/* No header and no way back: the account is gone. */-->
+<main class="screen">
+
+    <div class="screen__body">
+        <div class="done">
+            <span class="done__mark">
+                <svg th:replace="~{fragments/icons :: check}"></svg>
+            </span>
+
+            <h1 class="screen__title done__title">Account closed</h1>
+            <p class="screen__lead done__lead">
+                <span th:text="|${accountName} was closed on ${closedOn}.|">
+                    Savings ••••0457 was closed on 22 Sep 2026.
+                </span>
+                <!--/*
+                  Only said when there is an address it went to. The confirmation
+                  is queued by the account module's own event, not by this screen.
+                */-->
+                <span th:if="${email}" th:text="|We've emailed a confirmation to ${email}.|">
+                    We've emailed a confirmation to amina.w@example.com.
+                </span>
+            </p>
+        </div>
+
+        <section class="summary">
+            <dl class="summary__rows summary__rows--boxed">
+                <div class="summary__row" th:if="${reference}">
+                    <dt class="summary__label">Closure reference</dt>
+                    <dd class="summary__value" th:text="${reference}">KNX-CL-260922-0051</dd>
+                </div>
+                <div class="summary__row">
+                    <dt class="summary__label">Final balance</dt>
+                    <dd class="summary__value" th:text="${balance}">KES 0.00</dd>
+                </div>
+            </dl>
+        </section>
+    </div>
+
+    <nav class="screen__actions">
+        <a class="button button--primary" th:href="@{/accounts}">Back to my accounts</a>
+    </nav>
+
+</main>
+</body>
+</html>

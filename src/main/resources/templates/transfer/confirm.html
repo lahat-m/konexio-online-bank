@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!--/* docs/screens/3.3b Confirm recipient */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Is this the right person?</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Send money', @{/transfers})}"></header>
+
+    <form class="screen__form" method="post" th:action="@{/transfers/confirm}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">Is this the right person?</h1>
+
+            <!--/*
+              The masked name the bank holds, not the one the customer typed —
+              this screen is worth having only because the two can differ.
+            */-->
+            <section class="person-card">
+                <span class="avatar avatar--large" aria-hidden="true"
+                      th:text="${recipient.initials}">JO</span>
+                <p class="person-card__name" th:text="${recipient.maskedName}">Joseph Ot*****</p>
+                <p class="person-card__account"
+                   th:text="|Konexio account ${recipient.maskedAccountNumber}|">Konexio account ••••4420</p>
+            </section>
+
+            <!--/*
+              Only for an account this customer has not paid before. Shown every
+              time it would be a warning worth reading, and never when it would
+              be furniture the customer has learned to click past.
+            */-->
+            <aside class="note note--warning" th:if="${recipient.firstTime}">
+                <svg th:replace="~{fragments/icons :: alert}"></svg>
+                <span>
+                    You haven't sent money to this account before. Check the name with
+                    the person you're paying.
+                </span>
+            </aside>
+        </div>
+
+        <nav class="screen__actions">
+            <!--/*
+              Named after the person, because "Yes, continue" answers a question
+              nobody asked. The wrong-person way out is a link back to the number,
+              not a cancel: the customer wants to fix a digit, not abandon paying.
+            */-->
+            <button class="button button--primary" type="submit"
+                    th:text="${recipient.confirmLabel}">Yes, send to Joseph</button>
+            <a class="button button--secondary" th:href="@{/transfers}">No, change account number</a>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

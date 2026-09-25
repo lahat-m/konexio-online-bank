@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!--/* docs/screens/1 Log in */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Log in</title>
+</head>
+<body>
+<main class="screen">
+
+    <!--/* A way back but no flow name: this is not a step in anything. */-->
+    <header class="screen-header">
+        <a class="icon-button" th:href="@{/}" aria-label="Go back">
+            <svg th:replace="~{fragments/icons :: chevron-left}"></svg>
+        </a>
+    </header>
+
+    <form class="screen__form" method="post" th:action="@{/login}" novalidate>
+
+        <div class="screen__body">
+            <span class="brand__mark brand__mark--large" aria-hidden="true">K</span>
+
+            <h1 class="screen__title">Welcome back</h1>
+            <p class="screen__lead">Log in with your phone number and PIN.</p>
+
+            <div class="alert alert--error" th:if="${loginError}" role="alert">
+                <p th:text="${loginError}"></p>
+            </div>
+
+            <!--/*
+              Landing here after logging out is not a failure, and should not be
+              dressed as one. Only shown when nothing went wrong.
+            */-->
+            <div class="alert alert--info" th:if="${param.loggedOut != null and loginError == null}" role="status">
+                <p>You have been logged out.</p>
+            </div>
+
+            <div class="form">
+                <div class="field" th:classappend="${loginError} ? 'field--invalid'">
+                    <label class="field__label" for="phone">Phone number</label>
+                    <div class="field__group">
+                        <span class="field__prefix" th:text="${callingCode}">+254</span>
+                        <input class="field__control" type="tel" id="phone" name="phone"
+                               th:value="${phone}" placeholder="7XX XXX XXX" inputmode="tel"
+                               autocomplete="tel-national" enterkeyhint="next">
+                    </div>
+                </div>
+
+                <!--/*
+                  Never pre-filled, even after a refusal: a PIN left in a field is
+                  a PIN on a screen somebody has walked away from.
+                */-->
+                <div class="field" th:classappend="${loginError} ? 'field--invalid'">
+                    <label class="field__label" for="pin">PIN</label>
+                    <input class="field__control" type="password" id="pin" name="pin"
+                           inputmode="numeric" autocomplete="current-password" enterkeyhint="done">
+                </div>
+
+                <p class="form__aside">
+                    <a class="link" th:href="@{/forgot-pin}">Forgot PIN?</a>
+                </p>
+            </div>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Log in</button>
+            <p class="screen__footnote">
+                New to Konexio? <a class="link" th:href="@{/register}">Create account</a>
+            </p>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

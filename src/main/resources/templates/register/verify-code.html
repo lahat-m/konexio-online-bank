@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!--/* docs/screens/0.5 OTP */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Enter the code</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Create account', @{/register/contact})}"></header>
+    <div th:replace="~{fragments/screen :: progress(3, 4, 'Verify your phone')}"></div>
+
+    <form class="screen__form" method="post" th:action="@{/register/verify}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">Enter the code</h1>
+            <p class="screen__lead"
+               th:text="|We sent a ${otpLength}-digit code to ${phoneMasked}.|">
+                We sent a 6-digit code to +254 7•• ••• 312.
+            </p>
+
+            <div class="alert alert--error" th:if="${codeError}" role="alert">
+                <p th:text="${codeError}"></p>
+            </div>
+
+            <!--/*
+              One box per digit, each its own input so the screen works before any
+              script runs. They share a name, so the six arrive as one array and
+              are joined back into a code on the server.
+            */-->
+            <div class="otp" th:classappend="${codeError} ? 'otp--invalid'">
+                <input class="otp__digit" type="text" name="digits"
+                       th:each="position : ${#numbers.sequence(1, otpLength)}"
+                       th:id="|digit${position}|"
+                       th:attr="aria-label=|Digit ${position} of ${otpLength}|"
+                       maxlength="1" inputmode="numeric" autocomplete="one-time-code"
+                       pattern="[0-9]*" placeholder=" ">
+            </div>
+
+            <div class="otp__meta">
+                <p class="otp__countdown" th:if="${resendSeconds > 0}"
+                   th:attr="data-seconds=${resendSeconds}"
+                   th:text="|Resend code in ${resendLabel}|">Resend code in 0:42</p>
+                <p class="otp__resend" th:classappend="${resendSeconds > 0} ? 'is-hidden'">
+                    <button class="link-button" type="submit" th:formaction="@{/register/verify/resend}">
+                        Resend code
+                    </button>
+                </p>
+                <a class="link" th:href="@{/register/contact}">Change number</a>
+            </div>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Verify</button>
+        </nav>
+
+    </form>
+
+    <!--/*
+      Loaded here rather than in the layout because this is the only screen that
+      needs it, and deferred so the boxes work whether or not it ever arrives:
+      everything it does — moving to the next box, pasting six digits at once,
+      counting the resend down — is a convenience over a form that already
+      submits.
+    */-->
+    <script th:src="@{/js/otp.js}" defer></script>
+
+</main>
+</body>
+</html>

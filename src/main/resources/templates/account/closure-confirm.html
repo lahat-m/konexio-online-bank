@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!--/* docs/screens/5.3b Warning & confirm */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Close account</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Close account', @{/accounts/{id}/closure(id=${account.id})})}"></header>
+
+    <form class="screen__form" method="post"
+          th:action="@{/accounts/{id}/closure/confirm(id=${account.id})}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title" th:text="|Close ${accountName}?|">Close Savings ••••0457?</h1>
+
+            <aside class="note note--good">
+                <svg th:replace="~{fragments/icons :: check}"></svg>
+                <span th:text="|All checks passed. Balance is ${zeroBalance} and there is no active loan.|">
+                    All checks passed. Balance is KES 0.00 and there is no active loan.
+                </span>
+            </aside>
+
+            <!--/*
+              Red, and saying exactly what is lost: the statements go with the
+              account, so the sentence that warns about it is also the one that
+              offers them.
+            */-->
+            <aside class="note note--error">
+                <svg th:replace="~{fragments/icons :: alert}"></svg>
+                <span>
+                    Closing is permanent. You won't be able to reopen this account or see its
+                    statements in the app. Download statements first if you need them.
+                </span>
+            </aside>
+
+            <p>
+                <a class="link link--iconed" th:href="@{/activity}">
+                    <svg th:replace="~{fragments/icons :: arrow-down}"></svg>
+                    <span>Download statements</span>
+                </a>
+            </p>
+
+            <div class="field">
+                <label class="field__label" for="reason">Reason for closing (optional)</label>
+                <select class="field__control" id="reason" name="reason">
+                    <option th:each="option : ${reasons}" th:value="${option.value}"
+                            th:text="${option.label}" th:selected="${option.chosen}">I don't use it anymore</option>
+                </select>
+            </div>
+
+            <div class="checkbox" th:classappend="${acknowledgeError} ? 'checkbox--invalid'">
+                <input class="checkbox__control" type="checkbox" id="acknowledged" name="acknowledged"
+                       value="true" th:checked="${closure.acknowledged}">
+                <label class="checkbox__label" for="acknowledged">I understand this can't be undone.</label>
+            </div>
+            <p class="field__error field__error--iconed" th:if="${acknowledgeError}" role="alert">
+                <svg th:replace="~{fragments/icons :: alert}"></svg>
+                <span th:text="${acknowledgeError}">Tick the box to confirm.</span>
+            </p>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--danger" type="submit">Close account</button>
+            <a class="button button--secondary" th:href="@{/accounts/{id}(id=${account.id})}">Keep account</a>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>

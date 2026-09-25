@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!--/*
+  Chrome shared by every screen inside a flow: the way back, what the flow is
+  called, and how far through it you are. Screen 0.1 has none of it, because
+  there is nothing to go back to and nothing to be partway through.
+
+  Used as:
+    <header th:replace="~{fragments/screen :: header('Create account', @{/})}"></header>
+    <div th:replace="~{fragments/screen :: progress(1, 4, 'Personal details')}"></div>
+*/-->
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<header th:fragment="header(title, back)" class="screen-header">
+    <a class="icon-button" th:href="${back}" aria-label="Go back">
+        <svg th:replace="~{fragments/icons :: chevron-left}"></svg>
+    </a>
+    <h2 class="screen-header__title" th:text="${title}">Flow</h2>
+</header>
+
+<!--/*
+  The bar is decoration: it repeats what the sentence under it already says, so
+  it is hidden from a screen reader rather than read out as four list items of
+  nothing.
+*/-->
+<div th:fragment="progress(step, total, name)" class="progress">
+    <ol class="progress__track" aria-hidden="true">
+        <li th:each="index : ${#numbers.sequence(1, total)}"
+            class="progress__step"
+            th:classappend="${index <= step} ? 'progress__step--done'"></li>
+    </ol>
+    <p class="progress__label"
+       th:text="|Step ${step} of ${total}: ${name}|">Step 1 of 4: Personal details</p>
+</div>
+
+<!--/*
+  The bar along the bottom of the screens a customer lands on rather than walks
+  through. Used as:
+
+    <nav th:replace="~{fragments/screen :: tabs('activity')}"></nav>
+*/-->
+<nav th:fragment="tabs(current)" class="tabs" aria-label="Sections">
+    <a class="tab" th:classappend="${current == 'home'} ? 'tab--current'" th:href="@{/dashboard}"
+       th:attr="aria-current=${current == 'home'} ? 'page' : null">
+        <svg th:replace="~{fragments/icons :: home}"></svg>
+        <span class="tab__label">Home</span>
+    </a>
+    <a class="tab" th:classappend="${current == 'activity'} ? 'tab--current'" th:href="@{/activity}"
+       th:attr="aria-current=${current == 'activity'} ? 'page' : null">
+        <svg th:replace="~{fragments/icons :: list}"></svg>
+        <span class="tab__label">Activity</span>
+    </a>
+    <a class="tab" th:classappend="${current == 'accounts'} ? 'tab--current'" th:href="@{/accounts}"
+       th:attr="aria-current=${current == 'accounts'} ? 'page' : null">
+        <svg th:replace="~{fragments/icons :: wallet}"></svg>
+        <span class="tab__label">Accounts</span>
+    </a>
+    <a class="tab" th:classappend="${current == 'loans'} ? 'tab--current'" th:href="@{/loans}"
+       th:attr="aria-current=${current == 'loans'} ? 'page' : null">
+        <svg th:replace="~{fragments/icons :: card}"></svg>
+        <span class="tab__label">Loans</span>
+    </a>
+</nav>
+
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!--/* docs/screens/0.2 What you'll need */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>What you'll need</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Create account', @{/})}"></header>
+
+    <div class="screen__body">
+        <h1 class="screen__title">What you'll need</h1>
+        <p class="screen__lead">Have these ready before you start. It takes about 3 minutes.</p>
+
+        <ul class="checklist">
+            <li class="checklist__item">
+                <svg th:replace="~{fragments/icons :: id-card}"></svg>
+                <div class="checklist__text">
+                    <p class="checklist__title">Your National ID</p>
+                    <p class="checklist__detail">We check your name and ID number match</p>
+                </div>
+            </li>
+            <li class="checklist__item">
+                <svg th:replace="~{fragments/icons :: phone}"></svg>
+                <div class="checklist__text">
+                    <p class="checklist__title">Your phone</p>
+                    <p class="checklist__detail">We'll text a code to verify your number</p>
+                </div>
+            </li>
+            <li class="checklist__item">
+                <svg th:replace="~{fragments/icons :: mail}"></svg>
+                <div class="checklist__text">
+                    <p class="checklist__title">An email address</p>
+                    <p class="checklist__detail">For statements and receipts</p>
+                </div>
+            </li>
+            <li class="checklist__item">
+                <svg th:replace="~{fragments/icons :: lock}"></svg>
+                <div class="checklist__text">
+                    <p class="checklist__title">A 4-digit PIN in mind</p>
+                    <p class="checklist__detail">You'll use it to approve every transaction</p>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <nav class="screen__actions">
+        <a class="button button--primary" th:href="@{/register/details}">Start</a>
+    </nav>
+
+</main>
+</body>
+</html>

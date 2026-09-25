@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!--/* docs/screens/0.4 Contact details */-->
+<html th:replace="~{layout :: page(~{::title}, ~{::main})}" lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>How can we reach you?</title>
+</head>
+<body>
+<main class="screen">
+
+    <header th:replace="~{fragments/screen :: header('Create account', @{/register/details})}"></header>
+    <div th:replace="~{fragments/screen :: progress(2, 4, 'Contact details')}"></div>
+
+    <form class="screen__form" method="post" th:action="@{/register/contact}" th:object="${signUp}" novalidate>
+
+        <div class="screen__body">
+            <h1 class="screen__title">How can we reach you?</h1>
+            <p class="screen__lead">We'll send transaction alerts and receipts here.</p>
+
+            <div class="alert alert--error" th:if="${#fields.hasGlobalErrors()}" role="alert">
+                <p th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+            </div>
+
+            <div class="form">
+                <div class="field" th:classappend="${#fields.hasErrors('phone')} ? 'field--invalid'">
+                    <label class="field__label" for="phone">Phone number</label>
+                    <div class="field__group">
+                        <span class="field__prefix" th:text="${callingCode}">+254</span>
+                        <input class="field__control" type="tel" id="phone" th:field="*{phone}"
+                               placeholder="7XX XXX XXX" inputmode="tel" autocomplete="tel-national"
+                               enterkeyhint="next" aria-describedby="phoneHint">
+                    </div>
+                    <p class="field__error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></p>
+                    <p class="field__hint" id="phoneHint">We'll text a 6-digit code to this number.</p>
+                </div>
+
+                <div class="field" th:classappend="${#fields.hasErrors('email')} ? 'field--invalid'">
+                    <label class="field__label" for="email">Email address</label>
+                    <input class="field__control" type="email" id="email" th:field="*{email}"
+                           placeholder="name@example.com" inputmode="email" autocomplete="email"
+                           enterkeyhint="done">
+                    <p class="field__error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="screen__actions">
+            <button class="button button--primary" type="submit">Send code</button>
+        </nav>
+
+    </form>
+
+</main>
+</body>
+</html>
