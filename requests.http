@@ -1,0 +1,591 @@
+
+# Konexio Bank — end-to-end walkthrough
+
+@host = http://localhost:8080
+
+# The customer this walkthrough signs up. Change phone and nationalId to run
+# the flow again: both must be unique.
+@phone = +254712345570
+@nationalId = 1234567
+@pin = 7004
+
+# Filled in by hand from the app log, as described above.
+@otp = 288673
+@depositReference = ws_CO_520819971600
+@withdrawalReference = AG_692526302181
+
+# Step 4 sends money to this account. Use the accountNumber of any other open
+# customer account, e.g. from a second run of steps 0 and 1 with another phone.
+@recipientAccountNumber = 100200000030
+
+
+
+# 0. Sign up and log in
+
+
+### 0.1 Start the registration — logs OTP
+# Log line: "OTP for +254 7•• ••• 570 is 123456 (valid PT5M)". Copy it into @otp.
+# @name startRegistration
+POST {{host}}/api/registrations
+Content-Type: application/json
+
+{
+  "fullName": "Konexio Client",
+  "nationalId": "{{nationalId}}",
+  "dateOfBirth": "2003-04-12",
+  "phone": "{{phone}}",
+  "email": "client@konexio.com"
+}
+
+> {%
+  client.test("registration started", () => client.assert(response.status === 201, "expected 201"));
+  client.global.set("registrationId", response.body.id);
+%}
+
+### 0.2 send another OTP
+POST {{host}}/api/registrations/{{registrationId}}/otp-resends
+
+### 0.3 Verify the OTP
+POST {{host}}/api/registrations/{{registrationId}}/otp-verification
+Content-Type: application/json
+
+{
+  "code": "{{otp}}"
+}
+
+### 0.4 Set the PIN — this completes sign-up and creates the login credential
+PUT {{host}}/api/registrations/{{registrationId}}/pin
+Content-Type: application/json
+
+{
+  "pin": "{{pin}}"
+}
+
+### 0.5 Log in with phone + PIN
+# deviceId binds the refresh token to a device and must be 8–128 characters.
+# @name login
+POST {{host}}/api/tokens
+Content-Type: application/json
+
+{
+  "grantType": "pin",
+  "phone": "{{phone}}",
+  "pin": "{{pin}}",
+  "deviceId": "intellij-http-client",
+  "platform": "WEB",
+  "deviceModel": "IntelliJ HTTP Client"
+}
+
+> {%
+  client.test("logged in", () => client.assert(response.status === 200, "expected 200"));
+  client.global.set("accessToken", response.body.accessToken);
+  client.global.set("refreshToken", response.body.refreshToken);
+  client.global.set("customerId", response.body.customerId);
+%}
+
+### 0.6 The profile behind the login
+GET {{host}}/api/customers/me
+Authorization: Bearer {{accessToken}}
+
+
+
+# 1. Create a bank account
+
+
+### 1.1 Open the MAIN account — deposits land here and loans are paid into it
+# One open MAIN account per customer. Returns 201 with a 12-digit accountNumber.
+# @name openAccount
+POST {{host}}/api/accounts
+Authorization: Bearer {{accessToken}}
+Idempotency-Key: {{$uuid}}
+Content-Type: application/json
+
+{
+  "type": "MAIN",
+  "nickname": "Konexio Client"
+}
+
+> {%
+  client.test("account opened", () => client.assert(response.status === 201, "expected 201"));
+  client.global.set("accountId", response.body.id);
+  client.global.set("accountNumber", response.body.accountNumber);
+%}
+
+### 1.2 Read it back — status ACTIVE, balance 0.00
+GET {{host}}/api/accounts/{{accountId}}
+Authorization: Bearer {{accessToken}}
+
+### 1.3 All of this customer's accounts
+GET {{host}}/api/accounts?page=1&size=10
+Authorization: Bearer {{accessToken}}
+
+
+
+# 2. Deposit funds into the account
+#
+# A deposit is a request for money, not money: confirming it asks the provider
+# to collect, and the account is credited only when the provider calls back.
+
+
+### 2.1 Create the deposit — a quote showing the fee and the balance after
+# channel: MPESA (needs msisdn), CARD, or AGENT (needs agentCode).
+# @name createDeposit
+POST {{host}}/api/deposits
+Authorization: Bearer {{accessToken}}
+Idempotency-Key: {{$uuid}}
+Content-Type: application/json
+
+{
+  "toAccountId": "{{accountId}}",
+  "channel": "MPESA",
+  "amount": "10000.00",
+  "msisdn": "{{phone}}",
+  "note": "Salary"
+}
+
+> {%
+  client.global.set("depositId", response.body.id);
+%}
+
+### 2.2 Re-enter the PIN for this deposit — returns a single-use step-up token
+POST {{host}}/api/step-up-tokens
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "intentType": "DEPOSIT",
+  "intentId": "{{depositId}}",
+  "pin": "{{pin}}"
+}
+
+> {%
+  client.global.set("depositStepUpToken", response.body.stepUpToken);
+%}
+
+### 2.3 Confirm — 202 PROCESSING; nothing is credited yet
+# Log line: "STUB provider: collection of KES 10000.00 for intent … accepted as
+# ws_CO_…". Copy that reference into @depositReference.
+POST {{host}}/api/deposits/{{depositId}}/confirmation
+Authorization: Bearer {{accessToken}}
+Idempotency-Key: {{$uuid}}
+Step-Up-Token: {{depositStepUpToken}}
+
+### 2.4 Play the provider: report that the money arrived
+# The path must match the deposit's channel:
+#   MPESA -> /api/callbacks/mpesa/stk-results
+#   CARD  -> /api/callbacks/card-charges
+#   AGENT -> /api/callbacks/agent-transactions
+# Always answers 200 RECEIVED; a repeat of the same callback is not reapplied.
+POST {{host}}/api/callbacks/mpesa/stk-results
+Content-Type: application/json
+
+{
+  "externalReference": "{{depositReference}}",
+  "successful": true,
+  "resultCode": "0",
+  "resultDescription": "Success"
+}
+
+### 2.5 The deposit is now COMPLETED ...
+GET {{host}}/api/deposits/{{depositId}}
+Authorization: Bearer {{accessToken}}
+
+### 2.6 ... and the balance shows it
+GET {{host}}/api/accounts/{{accountId}}
+Authorization: Bearer {{accessToken}}
+
+
+
+# 3. Withdraw funds from the account
+#
+# The opposite of a deposit: the account is debited as soon as the withdrawal
+# is confirmed, and the callback only reports that the payout landed. A failed
+# payout reverses the debit.
+
+
+### 3.1 Create the withdrawal — the quote includes any fee
+# channel: MPESA (needs msisdn) or AGENT (needs agentCode).
+# @name createWithdrawal
+POST {{host}}/api/withdrawals
+Authorization: Bearer {{accessToken}}
+Idempotency-Key: {{$uuid}}
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{accountId}}",
+  "channel": "MPESA",
+  "amount": "5000.00",
+  "msisdn": "{{phone}}",
+  "note": "Cash out"
+}
+
+> {%
+  client.global.set("withdrawalId", response.body.id);
+%}
+
+### 3.2 PIN for this withdrawal
+POST {{host}}/api/step-up-tokens
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "intentType": "WITHDRAWAL",
+  "intentId": "{{withdrawalId}}",
+  "pin": "{{pin}}"
+}
+
+> {%
+  client.global.set("withdrawalStepUpToken", response.body.stepUpToken);
+%}
+
+### 3.3 Confirm — 202 PROCESSING, and the balance drops immediately
+# Log line: "STUB provider: payout of KES 2000.00 for intent … accepted as AG_…".
+# Copy that reference into @withdrawalReference.
+POST {{host}}/api/withdrawals/{{withdrawalId}}/confirmation
+Authorization: Bearer {{accessToken}}
+Idempotency-Key: {{$uuid}}
+Step-Up-Token: {{withdrawalStepUpToken}}
+
+### 3.4 Play the provider: the payout landed
+# For an agent payout use /api/callbacks/agent-transactions. To see a refused
+# payout reversed instead, send "successful": false or use
+# /api/callbacks/mpesa/b2c-timeouts.
+POST {{host}}/api/callbacks/mpesa/b2c-results
+Content-Type: application/json
+
+{
+  "externalReference": "{{withdrawalReference}}",
+  "successful": true,
+  "resultCode": "0",
+  "resultDescription": "Success"
+}
+
+### 3.5 The withdrawal is COMPLETED
+GET {{host}}/api/withdrawals/{{withdrawalId}}
+Authorization: Bearer {{accessToken}}
+
+
+
+# 4. Transfer funds to another account
+#
+# Both accounts are inside the bank, so there is no provider and no callback:
+# confirming moves the money in one ledger entry and answers 200 COMPLETED.
+
+
+### 4.1 Check who owns the destination number — the masked name to confirm
+# Rate-limited: this is the endpoint that turns a number into a name.
+GET {{host}}/api/recipients/{{recipientAccountNumber}}
+Authorization: Bearer {{accessToken}}
+
+### 4.2 Create the transfer
+# @name createTransfer
+POST {{host}}/api/transfers
+Authorization: Bearer {{accessToken}}
+Idempotency-Key: {{$uuid}}
+Content-Type: application/json
+
+{
+  "fromAccountId": "{{accountId}}",
+  "toAccountNumber": "{{recipientAccountNumber}}",
+  "amount": "3000.00",
+  "note": "Rent, September"
+}
+
+> {%
+  client.global.set("transferId", response.body.id);
+%}
+
+### 4.3 PIN for this transfer
+POST {{host}}/api/step-up-tokens
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "intentType": "TRANSFER",
+  "intentId": "{{transferId}}",
+  "pin": "{{pin}}"
+}
+
+> {%
+  client.global.set("transferStepUpToken", response.body.stepUpToken);
+%}
+
+### 4.4 Confirm — 200 COMPLETED, both balances already moved
+POST {{host}}/api/transfers/{{transferId}}/confirmation
+Authorization: Bearer {{accessToken}}
+Idempotency-Key: {{$uuid}}
+Step-Up-Token: {{transferStepUpToken}}
+
+> {%
+  client.test("transfer completed", () => client.assert(response.body.status === "COMPLETED", "expected COMPLETED"));
+%}
+
+### 4.5 Balance after the transfer
+GET {{host}}/api/accounts/{{accountId}}
+Authorization: Bearer {{accessToken}}
+
+
+
+# 5. Delete (close) a dormant bank account
+#
+# Closing is a logical delete: the row stays, marked CLOSED with a closure
+# reference. Three checks must all pass — the account is DORMANT, it is empty,
+# and no loan is linked to it. The MAIN account is kept for step 6, so this
+# closes a separate SAVINGS account.
+
+
+### 5.1 Open a SAVINGS account to retire
+# @name openSavings
+POST {{host}}/api/accounts
+Authorization: Bearer {{accessToken}}
+Idempotency-Key: {{$uuid}}
+Content-Type: application/json
+
+{
+  "type": "SAVINGS",
+  "nickname": "Konexio savings"
+}
+
+> {%
+  client.global.set("savingsAccountId", response.body.id);
+%}
+
+### 5.2 Ask what stands in the way — always 200, a checklist rather than a refusal
+# Right now DORMANT fails: the account was opened a moment ago.
+GET {{host}}/api/accounts/{{savingsAccountId}}/closure-eligibility
+Authorization: Bearer {{accessToken}}
+
+### 5.3 Make it dormant (not an API call — run this in a terminal first)
+# Accounts go dormant after 12 months without customer activity, marked by the
+# nightly dormancy job. Locally, backdate the activity and run the job's
+# function yourself (replace <savingsAccountId> with the id from 5.1):
+#
+#   docker exec bank-postgres-1 psql -U konexio -d konexio -c "update account.account set last_customer_activity_at = now() - interval '13 months' where id = '<savingsAccountId>'; select account.mark_dormant_accounts(interval '12 months');"
+#
+# This request then shows status DORMANT, and 5.2 reports "eligible": true.
+GET {{host}}/api/accounts/{{savingsAccountId}}
+Authorization: Bearer {{accessToken}}
+
+### 5.4 PIN for this closure — the intent id is the account id
+POST {{host}}/api/step-up-tokens
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "intentType": "ACCOUNT_CLOSURE",
+  "intentId": "{{savingsAccountId}}",
+  "pin": "{{pin}}"
+}
+
+> {%
+  client.global.set("closureStepUpToken", response.body.stepUpToken);
+%}
+
+### 5.5 Close it
+# reason: NOT_USED, CONSOLIDATING, MOVING_BANK or OTHER.
+# 409 "Account cannot be closed yet" if any check still fails.
+DELETE {{host}}/api/accounts/{{savingsAccountId}}?reason=NOT_USED
+Authorization: Bearer {{accessToken}}
+Step-Up-Token: {{closureStepUpToken}}
+
+### 5.6 The record is still there — status CLOSED
+GET {{host}}/api/accounts/{{savingsAccountId}}
+Authorization: Bearer {{accessToken}}
+
+
+
+# 6. Create a loan account and disburse KES 10,000 into the account from step 1
+#
+# The INSTANT_10K product lends a fixed KES 10,000 over 30 days at 1% flat
+# (V20). Accepting an offer opens a LOAN account whose balance is what is owed,
+# pays the principal into the MAIN account, and writes the repayment schedule —
+# all in one transaction.
+
+
+### 6.1 Current offers — reading them prices one and keeps it
+# 422 with a reason if the customer cannot borrow (KYC incomplete, a loan
+# already open, no MAIN account, credit score too low).
+# @name loanOffers
+GET {{host}}/api/loan-offers
+Authorization: Bearer {{accessToken}}
+
+> {%
+  client.global.set("offerId", response.body[0].id);
+%}
+
+### 6.2 One offer in full: principal, interest, fee, total repayable, due date
+GET {{host}}/api/loan-offers/{{offerId}}
+Authorization: Bearer {{accessToken}}
+
+### 6.3 PIN for accepting this offer — the intent id is the offer id
+POST {{host}}/api/step-up-tokens
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "intentType": "LOAN_ACCEPTANCE",
+  "intentId": "{{offerId}}",
+  "pin": "{{pin}}"
+}
+
+> {%
+  client.global.set("loanStepUpToken", response.body.stepUpToken);
+%}
+
+### 6.4 Accept — opens the loan account and disburses KES 10,000
+# termsAccepted must be true; the loan is paid into the MAIN account.
+# @name acceptLoan
+POST {{host}}/api/loans
+Authorization: Bearer {{accessToken}}
+Idempotency-Key: {{$uuid}}
+Step-Up-Token: {{loanStepUpToken}}
+Content-Type: application/json
+
+{
+  "offerId": "{{offerId}}",
+  "disburseToAccountId": "{{accountId}}",
+  "termsAccepted": true
+}
+
+> {%
+  client.test("loan disbursed", () => client.assert(response.status === 201, "expected 201"));
+  client.global.set("loanId", response.body.id);
+  client.global.set("loanAccountId", response.body.loanAccountId);
+%}
+
+### 6.5 The loan — status ACTIVE, outstanding KES 10,100.00
+GET {{host}}/api/loans/{{loanId}}
+Authorization: Bearer {{accessToken}}
+
+### 6.6 Its repayment schedule — one instalment, due in 30 days
+GET {{host}}/api/loans/{{loanId}}/repayment-schedule
+Authorization: Bearer {{accessToken}}
+
+### 6.7 The MAIN account, KES 10,000.00 higher
+GET {{host}}/api/accounts/{{accountId}}
+Authorization: Bearer {{accessToken}}
+
+### 6.8 The loan account — its balance is the amount owed
+GET {{host}}/api/accounts/{{loanAccountId}}
+Authorization: Bearer {{accessToken}}
+
+
+
+# 7. What happened — history and receipts
+
+
+### 7.1 Every movement, newest first
+# Filters: accountId, direction (IN|OUT), type, from, to; page is 1-based.
+# @name transactions
+GET {{host}}/api/transactions?accountId={{accountId}}&page=1&size=20
+Authorization: Bearer {{accessToken}}
+
+> {%
+  client.global.set("transactionId", response.body.data[0].id);
+%}
+
+### 7.2 One transaction in full
+GET {{host}}/api/transactions/{{transactionId}}
+Authorization: Bearer {{accessToken}}
+
+### 7.3 Its receipt as a PDF, saved next to this file
+GET {{host}}/api/transactions/{{transactionId}}/receipt
+Authorization: Bearer {{accessToken}}
+Accept: application/pdf
+
+>> receipt.pdf
+
+
+
+# Appendix — other customer calls
+
+
+### Edit a quote before confirming it (same shape for /api/deposits and /api/withdrawals)
+# Only while PENDING_CONFIRMATION; the fee and balance-after are re-quoted.
+PATCH {{host}}/api/transfers/{{transferId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "amount": "2500.00",
+  "note": "Rent, part payment"
+}
+
+### Cancel an unconfirmed quote (same shape for /api/deposits and /api/withdrawals)
+DELETE {{host}}/api/transfers/{{transferId}}
+Authorization: Bearer {{accessToken}}
+
+### Refresh the access token (it lasts 10 minutes)
+# @name refresh
+POST {{host}}/api/tokens
+Content-Type: application/json
+
+{
+  "grantType": "refresh_token",
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+  client.global.set("accessToken", response.body.accessToken);
+  client.global.set("refreshToken", response.body.refreshToken);
+%}
+
+### Log out — revokes the whole refresh-token family
+POST {{host}}/api/tokens/revocation
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Public signing keys for the access tokens
+GET {{host}}/.well-known/jwks.json
+
+### Health
+GET {{host}}/actuator/health
+
+
+
+# Staff API — needs STAFF_BOOTSTRAP_USERNAME / _PASSWORD set before boot
+
+
+@staffUsername = compliance
+@staffPassword = change-me
+
+### Staff login
+# @name staffLogin
+POST {{host}}/api/staff/tokens
+Content-Type: application/json
+
+{
+  "username": "{{staffUsername}}",
+  "password": "{{staffPassword}}"
+}
+
+> {%
+  client.global.set("staffToken", response.body.accessToken);
+%}
+
+### Find a customer by name, phone, email or national id
+GET {{host}}/api/staff/customers?q=Joseph&page=1&size=10
+Authorization: Bearer {{staffToken}}
+
+### The customer's full record
+GET {{host}}/api/staff/customers/{{customerId}}
+Authorization: Bearer {{staffToken}}
+
+### Their statement for one account
+GET {{host}}/api/staff/customers/{{customerId}}/statement?accountId={{accountId}}&page=1&size=20
+Authorization: Bearer {{staffToken}}
+
+### One account, including internal detail
+GET {{host}}/api/staff/accounts/{{accountId}}
+Authorization: Bearer {{staffToken}}
+
+### Audit log — e.g. every completed deposit
+GET {{host}}/api/staff/events?action=DEPOSIT_COMPLETED&resourceType=PAYMENT&outcome=SUCCESS&page=1&size=20
+Authorization: Bearer {{staffToken}}
+
+### Security events — e.g. failed logins for this customer
+GET {{host}}/api/staff/security-events?eventType=LOGIN_FAILED&subjectType=CUSTOMER&subjectId={{customerId}}&page=1&size=20
+Authorization: Bearer {{staffToken}}
