@@ -73,8 +73,8 @@
     --space-12: 3rem;
 
     /* Shape */
-    --radius-control: 0.75rem;   /* buttons, inputs */
-    --radius-panel: 1rem;        /* illustrations, cards */
+    --radius-control: 0.5rem;    /* 8px: buttons, inputs */
+    --radius-panel: 0.5rem;      /* 8px: cards, illustrations */
     --radius-mark: 0.875rem;     /* the logo squircle */
     --radius-pill: 999px;
 
@@ -255,7 +255,7 @@ a {
     width: var(--tap-target);
     height: var(--tap-target);
     border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-control);
     background-color: var(--color-canvas);
     color: var(--color-ink);
     text-decoration: none;
@@ -617,7 +617,7 @@ a {
     place-items: center;
     min-height: var(--keypad-key-height);
     border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-control);
     background-color: var(--color-surface);
     color: var(--color-ink);
     font-family: inherit;
@@ -671,8 +671,8 @@ a {
     width: var(--badge-size);
     height: var(--badge-size);
     border-radius: var(--radius-pill);
-    background-color: var(--color-primary-soft);
-    color: var(--color-primary);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
 }
 
 /* The tick is the picture here, not an icon in a row of text. */
@@ -704,14 +704,14 @@ a {
 
 /* On its way is not the same news as arrived, and does not get the same colour. */
 .done__badge--waiting {
-    background-color: var(--color-surface);
-    color: var(--color-ink-muted);
+    background-color: var(--color-ink-muted);
+    color: var(--color-on-primary);
 }
 
 /* Nor is a refusal. Red, and only here — nothing else on these screens is. */
 .done__badge--danger {
-    background-color: var(--color-danger-soft);
-    color: var(--color-danger);
+    background-color: var(--color-danger);
+    color: var(--color-on-primary);
 }
 
 /* ----------------------------------------------------------- account card */
@@ -774,7 +774,7 @@ a {
     min-height: var(--tap-target);
     padding-inline: var(--space-5);
     border: var(--border-width) solid var(--color-ink-inverse-muted);
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-control);
     background: none;
     color: var(--color-ink-inverse);
     font: inherit;
@@ -879,14 +879,15 @@ a {
     text-decoration: none;
 }
 
+/* Icon badges are solid colour with a white icon, here and everywhere else. */
 .quick-action__badge {
     display: grid;
     place-items: center;
     width: var(--quick-action-size);
     height: var(--quick-action-size);
     border-radius: var(--radius-pill);
-    background-color: var(--color-primary-soft);
-    color: var(--color-primary);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
 }
 
 .quick-action__label {
@@ -916,8 +917,8 @@ a {
     width: var(--quick-action-size);
     height: var(--quick-action-size);
     border-radius: var(--radius-pill);
-    background-color: var(--color-surface);
-    color: var(--color-ink);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
 }
 
 .row-card__text {
@@ -1311,13 +1312,13 @@ a {
 }
 
 .check__mark--passed {
-    background-color: var(--color-primary-soft);
-    color: var(--color-primary);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
 }
 
 .check__mark--failed {
-    background-color: var(--color-danger-soft);
-    color: var(--color-danger);
+    background-color: var(--color-danger);
+    color: var(--color-on-primary);
 }
 
 .check__text {
@@ -1368,8 +1369,8 @@ a {
     width: var(--quick-action-size);
     height: var(--quick-action-size);
     border-radius: var(--radius-pill);
-    background-color: var(--color-surface);
-    color: var(--color-ink);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
 }
 
 .activity {
@@ -1651,7 +1652,7 @@ a {
     min-height: var(--tap-target);
     padding-inline: var(--space-5);
     border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-control);
     background-color: var(--color-surface);
     color: var(--color-ink);
     font: inherit;
@@ -2037,7 +2038,7 @@ a {
 .brand__mark--large {
     width: var(--brand-mark-large);
     height: var(--brand-mark-large);
-    border-radius: var(--radius-panel);
+    border-radius: var(--radius-mark);
     font-size: var(--text-heading);
 }
 
