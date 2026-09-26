@@ -40,6 +40,11 @@
     <nav th:replace="~{fragments/screen :: tabs('activity')}"></nav>
 */-->
 <nav th:fragment="tabs(current)" class="tabs" aria-label="Sections">
+    <!--/* Only shown when the bar becomes a sidebar, on a desktop screen. */-->
+    <a class="tabs__brand brand" th:href="@{/dashboard}">
+        <span class="brand__mark" aria-hidden="true">K</span>
+        <span class="brand__name">Konexio</span>
+    </a>
     <a class="tab" th:classappend="${current == 'home'} ? 'tab--current'" th:href="@{/dashboard}"
        th:attr="aria-current=${current == 'home'} ? 'page' : null">
         <svg th:replace="~{fragments/icons :: home}"></svg>

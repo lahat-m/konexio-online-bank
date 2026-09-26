@@ -16,6 +16,8 @@
     --color-ink-inverse-muted: #9fb0bb;
     --color-surface-dark: #16232f;
     --color-on-primary: #ffffff;
+    --color-on-primary-muted: rgba(255, 255, 255, 0.78);
+    --color-on-primary-line: rgba(255, 255, 255, 0.22);
 
     --color-ink: #11212e;
     --color-ink-muted: #4a5c68;
@@ -49,6 +51,7 @@
     --text-label: 1rem;          /* 16px */
     --text-heading: 1.3125rem;   /* 21px, the flow name in a screen header */
     --text-title: 2.125rem;      /* 34px */
+    --text-display: 2.75rem;     /* 44px, desktop only: the brand statement, the balance */
 
     --leading-tight: 1.15;
     --leading-normal: 1.55;
@@ -95,6 +98,9 @@
     --track-height: 0.3125rem;   /* 5px */
     --screen-gutter: var(--space-5);
     --screen-max-width: 30rem;   /* a phone column, centred on anything wider */
+    --sidebar-width: 16rem;      /* the tab bar, turned sideways on a desktop */
+    --content-max-width: 72rem;  /* a tabbed screen's content beside the sidebar */
+    --form-max-width: 32rem;     /* a flow's column beside the brand panel */
     --control-height: 3.5rem;
     --tap-target: 2.75rem;
 }
@@ -197,6 +203,27 @@ a {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+}
+
+/*
+ * Groupings that only mean something on a desktop screen: two columns on Home
+ * and the loan account, a grid of account cards. On a phone they step out of
+ * the way, so their children sit in the screen's column exactly as before.
+ */
+.columns,
+.columns__main,
+.account-list {
+    display: contents;
+}
+
+/*
+ * The desktop brand panel beside a flow, and the brand at the top of the
+ * sidebar; see "desktop" at the end of the file. The sidebar brand is also a
+ * .brand, whose display rule comes later, hence the extra class here.
+ */
+.page-aside,
+.tabs .tabs__brand {
+    display: none;
 }
 
 /* ------------------------------------------------------------ screen header */
@@ -559,6 +586,14 @@ a {
 
 .pin--keypad .field {
     display: none;
+}
+
+/* Replaces the keypad on a desktop screen with a keyboard; see "desktop". */
+.pin__hint {
+    display: none;
+    color: var(--color-ink-muted);
+    font-size: var(--text-caption);
+    text-align: center;
 }
 
 .pin__dot {
@@ -2140,8 +2175,8 @@ a {
  *
  * So above this breakpoint the screen stops being viewport-tall and becomes
  * what it is — one phone screen — sitting on a tinted page as a card. The
- * layout inside it does not change, which is the point: there is one design
- * here, not two.
+ * layout inside it does not change. That holds up to a tablet; a desktop gets
+ * a layout of its own, in the next section.
  */
 @media (min-width: 40rem) {
     body.page {
@@ -2175,5 +2210,276 @@ a {
     .tabs {
         position: absolute;
         border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+    }
+}
+
+/* ----------------------------------------------------------------- desktop */
+
+/*
+ * A desktop is not a big phone. Two layouts take over from the card above:
+ *
+ *   A flow (sign-up, log in, each step of moving money) splits the window:
+ *   the brand panel on the left, the form on the right, in a column narrow
+ *   enough to read as a form rather than a stretched phone screen.
+ *
+ *   A tabbed screen (Home, Activity, Accounts, a loan) turns its tab bar into
+ *   a sidebar and spreads its content across the window: Home and the loan
+ *   put their activity in a second column, Accounts lays its cards in a grid.
+ *
+ * The markup is the phone's, unchanged; only this section knows about desktops.
+ */
+@media (min-width: 64rem) {
+
+    /* Flows: brand panel | form */
+    body.page {
+        display: grid;
+        grid-template-columns: minmax(24rem, 5fr) 7fr;
+        grid-template-rows: minmax(100dvh, auto);
+        place-items: stretch;
+        padding: 0;
+        background-color: var(--color-canvas);
+    }
+
+    .page-aside {
+        position: sticky;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: var(--space-10);
+        height: 100dvh;
+        padding: var(--space-12);
+        background-color: var(--color-primary);
+        color: var(--color-on-primary);
+    }
+
+    .page-aside .brand__mark {
+        background-color: var(--color-on-primary);
+        color: var(--color-primary);
+    }
+
+    .page-aside__statement {
+        max-width: 16ch;
+        font-size: var(--text-display);
+        font-weight: var(--weight-bold);
+        line-height: var(--leading-tight);
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+    }
+
+    .page-aside__facts {
+        max-width: 26rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: var(--color-on-primary-muted);
+    }
+
+    .page-aside__facts li {
+        padding-block: var(--space-4);
+        border-top: var(--border-width) solid var(--color-on-primary-line);
+    }
+
+    .screen {
+        align-self: center;
+        justify-self: center;
+        width: 100%;
+        max-width: var(--form-max-width);
+        min-height: 0;
+        padding: var(--space-12) var(--space-8);
+        border: none;
+        border-radius: 0;
+        background: none;
+        box-shadow: none;
+    }
+
+    /* The brand panel already says who this is. */
+    .screen > .brand,
+    .brand__mark--large {
+        display: none;
+    }
+
+    /* Tabbed screens: sidebar | content */
+    body.page:has(> .screen--tabbed) {
+        display: block;
+        background-color: var(--color-surface);
+    }
+
+    body.page:has(> .screen--tabbed) > .page-aside {
+        display: none;
+    }
+
+    /*
+     * Undoes the flow column above: auto width, so the sidebar's margin comes
+     * out of the window rather than being added to it, and no centring, which
+     * applies to block boxes too and would slide the content under the sidebar.
+     */
+    .screen--tabbed {
+        position: static;
+        justify-self: auto;
+        align-self: auto;
+        width: auto;
+        max-width: none;
+        min-height: 100dvh;
+        margin: 0 0 0 var(--sidebar-width);
+        padding: var(--space-10) var(--space-12);
+    }
+
+    .screen--tabbed > :not(.tabs) {
+        width: 100%;
+        max-width: var(--content-max-width);
+    }
+
+    .tabs {
+        position: fixed;
+        inset: 0 auto 0 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        width: var(--sidebar-width);
+        padding: var(--space-8) var(--space-4);
+        border-top: none;
+        border-right: var(--border-width) solid var(--color-border);
+        border-radius: 0;
+        background-color: var(--color-canvas);
+    }
+
+    .tabs .tabs__brand {
+        display: flex;
+        margin: 0 0 var(--space-8) var(--space-3);
+        color: var(--color-ink);
+        text-decoration: none;
+    }
+
+    .tab {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: var(--space-3);
+        min-height: var(--tap-target);
+        padding-inline: var(--space-4);
+        border-radius: var(--radius-control);
+    }
+
+    .tab--current {
+        background-color: var(--color-primary-soft);
+    }
+
+    .tab__label {
+        font-size: var(--text-body);
+    }
+
+    .greeting__name {
+        font-size: var(--text-title);
+    }
+
+    /* On the tinted page the avatar needs its own ground. */
+    .screen--tabbed .avatar {
+        border: var(--border-width) solid var(--color-border);
+        background-color: var(--color-canvas);
+    }
+
+    .columns {
+        display: grid;
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+        align-items: start;
+        gap: var(--space-8);
+    }
+
+    .columns__main {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+    }
+
+    .account-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+        gap: var(--space-4);
+    }
+
+    /* White panels on the tinted page, so each block reads as one thing. */
+    .screen--tabbed .activity {
+        padding: var(--space-6);
+        border: var(--border-width) solid var(--color-border);
+        border-radius: var(--radius-panel);
+        background-color: var(--color-canvas);
+    }
+
+    .screen--tabbed .row-card,
+    .screen--tabbed .account-row,
+    .screen--tabbed .loan-card,
+    .screen--tabbed .summary {
+        background-color: var(--color-canvas);
+    }
+
+    /*
+     * A row is badge, text, amount. Spaced apart on a wide panel, the text
+     * drifts to the middle; it belongs against its badge, with the slack
+     * before the amount.
+     */
+    .activity__text {
+        flex: 1 1 auto;
+    }
+
+    .account-row__number {
+        white-space: nowrap;
+    }
+
+    .account-card {
+        padding: var(--space-8);
+    }
+
+    .account-card__balance-amount {
+        font-size: var(--text-display);
+    }
+
+    /* Round thumb targets become buttons with their names beside them. */
+    .quick-actions {
+        grid-auto-flow: row;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .quick-action {
+        flex-direction: row;
+        gap: var(--space-3);
+        padding: var(--space-3);
+        border: var(--border-width) solid var(--color-border);
+        border-radius: var(--radius-control);
+        background-color: var(--color-canvas);
+        color: var(--color-ink);
+    }
+
+    .quick-action__badge {
+        flex: none;
+        width: var(--tap-target);
+        height: var(--tap-target);
+    }
+
+    .quick-action__label {
+        text-align: left;
+    }
+}
+
+@media (min-width: 64rem) and (hover: hover) {
+    .tab:not(.tab--current):hover {
+        background-color: var(--color-surface);
+    }
+
+    .quick-action:hover {
+        border-color: var(--color-primary);
+    }
+}
+
+/*
+ * A keypad is for a touchscreen. With a mouse and a keyboard, pin.js already
+ * takes typed digits, so the dots stay and the keys go.
+ */
+@media (min-width: 64rem) and (pointer: fine) {
+    .pin--keypad .keypad {
+        display: none;
+    }
+
+    .pin--keypad .pin__hint {
+        display: block;
     }
 }

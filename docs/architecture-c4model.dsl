@@ -23,9 +23,9 @@ workspace "Konexio Online Bank" "Digital bank account: open account, deposit, wi
 
     model {
 
-        # ==================================================================
+
         # PEOPLE & BOUNDARIES
-        # ==================================================================
+
         customer = person "Customer" "Kenyan retail or SME customer. Uses the mobile app to bank and borrow."
 
         group "Konexio Bank (enterprise boundary)" {
@@ -242,9 +242,9 @@ workspace "Konexio Online Bank" "Digital bank account: open account, deposit, wi
             email = softwareSystem "Email Service" "Receipts, statements, closure confirmations." "External"
         }
 
-        # ==================================================================
+
         # L1/L2 RELATIONSHIPS (declared before L3 to avoid implied duplicates)
-        # ==================================================================
+
         customer -> konexio.mobileApp "Opens account, moves money, closes accounts, borrows"
         opsStaff -> konexio.backOffice "Investigates cases; reverses failed payments"
         compliance -> konexio.backOffice "Reviews KYC, closures, audit logs"
@@ -275,9 +275,9 @@ workspace "Konexio Online Bank" "Digital bank account: open account, deposit, wi
         konexio.worker -> mpesa "Queries status of pending payments" "HTTPS/JSON"
         konexio.worker -> crb "Reports loan performance" "HTTPS/JSON"
 
-        # ==================================================================
+
         # L3 RELATIONSHIPS - AUTH SERVICE
-        # ==================================================================
+
         konexio.mobileApp -> konexio.authService.authController "Registers, verifies OTP, logs in, refreshes" "HTTPS/JSON"
         konexio.mobileApp -> konexio.authService.stepUpController "Sends PIN + intentId before money moves" "HTTPS/JSON"
         konexio.backOffice -> konexio.authService.authController "Staff login with MFA" "HTTPS/JSON"
@@ -312,9 +312,9 @@ workspace "Konexio Online Bank" "Digital bank account: open account, deposit, wi
         konexio.authService.otpRepo -> konexio.identityDb "otp_challenge" "JDBC/TLS"
         konexio.authService.refreshTokenRepo -> konexio.identityDb "refresh_token" "JDBC/TLS"
 
-        # ==================================================================
+
         # L3 RELATIONSHIPS - CORE BANKING API
-        # ==================================================================
+
         konexio.mobileApp -> konexio.bankingApi.accountController "Opens, views, closes accounts" "HTTPS/JSON"
         konexio.mobileApp -> konexio.bankingApi.paymentController "Creates and confirms payment intents" "HTTPS/JSON"
         konexio.mobileApp -> konexio.bankingApi.historyController "Lists transactions; fetches receipts" "HTTPS/JSON"
@@ -374,9 +374,9 @@ workspace "Konexio Online Bank" "Digital bank account: open account, deposit, wi
         konexio.bankingApi.loanRepo -> konexio.bankingDb "loan, repayment_schedule" "JDBC/TLS"
         konexio.bankingApi.outboxRepo -> konexio.bankingDb "outbox_event" "JDBC/TLS"
 
-        # ==================================================================
+
         # L3 RELATIONSHIPS - WORKER
-        # ==================================================================
+
         konexio.worker.outboxRelay -> konexio.bankingDb "Claims PENDING events (FOR UPDATE SKIP LOCKED)" "JDBC/TLS"
         konexio.worker.outboxRelay -> konexio.worker.notificationClient "Dispatches SMS/email"
         konexio.worker.dormancyJob -> konexio.bankingDb "Sets status DORMANT" "JDBC/TLS"
@@ -388,9 +388,9 @@ workspace "Konexio Online Bank" "Digital bank account: open account, deposit, wi
         konexio.worker.notificationClient -> sms "Alert SMS" "HTTPS/JSON"
         konexio.worker.notificationClient -> email "Receipt / confirmation email" "HTTPS/JSON"
 
-        # ==================================================================
+
         # L4 RELATIONSHIPS - CODE: AUTH JWT
-        # ==================================================================
+
         konexio.authService.clsAuthSecurityConfig -> konexio.authService.clsPhonePinProvider "Registers in ProviderManager"
         konexio.authService.clsAuthSecurityConfig -> konexio.authService.fwArgon2Encoder "Declares PIN encoder bean"
         konexio.authService.clsAuthSecurityConfig -> konexio.authService.fwNimbusJwtEncoder "Declares JwtEncoder bean"
@@ -409,9 +409,9 @@ workspace "Konexio Online Bank" "Digital bank account: open account, deposit, wi
         konexio.authService.clsCredentialRepo -> konexio.identityDb "customer_credential" "JDBC/TLS"
         konexio.authService.clsRefreshTokenRepo -> konexio.identityDb "refresh_token" "JDBC/TLS"
 
-        # ==================================================================
+
         # L4 RELATIONSHIPS - CODE: RESOURCE SERVER
-        # ==================================================================
+
         konexio.bankingApi.clsBankingSecurityConfig -> konexio.bankingApi.fwNimbusJwtDecoder "Builds access + step-up decoders"
         konexio.bankingApi.clsBankingSecurityConfig -> konexio.bankingApi.clsJwtConverter "Sets jwtAuthenticationConverter"
         konexio.bankingApi.clsBankingSecurityConfig -> konexio.bankingApi.clsOwnershipManager "access() on /accounts/{accountId}/**"
@@ -423,9 +423,9 @@ workspace "Konexio Online Bank" "Digital bank account: open account, deposit, wi
         konexio.bankingApi.clsOwnershipManager -> konexio.bankingApi.clsAccountRepo "findOwnerId(accountId)"
         konexio.bankingApi.clsStepUpVerifier -> konexio.bankingApi.fwNimbusJwtDecoder "decode(stepUpToken)"
 
-        # ==================================================================
+
         # L4 RELATIONSHIPS - CODE: TRANSFER & LEDGER
-        # ==================================================================
+
         konexio.bankingApi.clsPaymentController -> konexio.bankingApi.clsStepUpVerifier "verify() before confirm"
         konexio.bankingApi.clsPaymentController -> konexio.bankingApi.clsPaymentService "createIntent(), confirm()"
         konexio.bankingApi.clsPaymentService -> konexio.bankingApi.clsPaymentIntent "Creates; drives status"
@@ -444,9 +444,9 @@ workspace "Konexio Online Bank" "Digital bank account: open account, deposit, wi
         konexio.bankingApi.clsLedgerRepo -> konexio.bankingDb "journal_entry, posting" "JDBC/TLS"
         konexio.bankingApi.clsAccountRepo -> konexio.bankingDb "account (SELECT ... FOR UPDATE)" "JDBC/TLS"
 
-        # ==================================================================
+
         # L4 RELATIONSHIPS - CODE: ACCOUNT CLOSURE
-        # ==================================================================
+
         konexio.bankingApi.clsAccountController -> konexio.bankingApi.clsClosurePolicy "evaluate() for checklist"
         konexio.bankingApi.clsAccountController -> konexio.bankingApi.clsStepUpVerifier "verify() before close"
         konexio.bankingApi.clsAccountController -> konexio.bankingApi.clsAccountService "close(reason)"
@@ -461,9 +461,9 @@ workspace "Konexio Online Bank" "Digital bank account: open account, deposit, wi
         konexio.bankingApi.clsNoActiveLoanCheck -> konexio.bankingApi.clsClosureCheck "implements" "" "Implements"
         konexio.bankingApi.clsNoActiveLoanCheck -> konexio.bankingApi.clsLoanRepo "existsActiveByAccountId()"
 
-        # ==================================================================
+
         # L4 RELATIONSHIPS - CODE: LOAN DISBURSEMENT
-        # ==================================================================
+
         konexio.bankingApi.clsLoanController -> konexio.bankingApi.clsStepUpVerifier "verify() before accept"
         konexio.bankingApi.clsLoanController -> konexio.bankingApi.clsLoanService "offer(), acceptAndDisburse()"
         konexio.bankingApi.clsLoanService -> konexio.bankingApi.clsLoanEligibility "evaluate(customer)"

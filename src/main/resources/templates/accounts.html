@@ -15,26 +15,28 @@
             You have no account open yet. <a class="link" th:href="@{/dashboard}">Start on the home screen</a>.
         </p>
 
-        <!--/*
-          A loan account is in this list because a customer thinks of it as one of
-          their accounts, and it is drawn like the others — but what it shows is
-          what they owe, so the figure says so.
-        */-->
-        <a class="account-row" th:each="account : ${accounts}"
-           th:href="@{/accounts/{id}(id=${account.id})}">
-            <span class="account-row__head">
-                <span class="account-row__label" th:text="${account.label}">Main account</span>
-                <span class="badge" th:classappend="|badge--${account.statusTone}|"
-                      th:text="${account.status}">Active</span>
-            </span>
-            <span class="account-row__body">
-                <span class="account-row__number" th:text="${account.number}">1002 4587 3310</span>
-                <span class="account-row__balance" th:text="${account.balance}">KES 24,500.00</span>
-            </span>
-            <!--/* The date is the reason the word "Dormant" is up there. */-->
-            <span class="account-row__note" th:if="${account.dormancy}"
-                  th:text="${account.dormancy}">No activity since 14 Aug 2025</span>
-        </a>
+        <div class="account-list">
+            <!--/*
+              A loan account is in this list because a customer thinks of it as one of
+              their accounts, and it is drawn like the others — but what it shows is
+              what they owe, so the figure says so.
+            */-->
+            <a class="account-row" th:each="account : ${accounts}"
+               th:href="@{/accounts/{id}(id=${account.id})}">
+                <span class="account-row__head">
+                    <span class="account-row__label" th:text="${account.label}">Main account</span>
+                    <span class="badge" th:classappend="|badge--${account.statusTone}|"
+                          th:text="${account.status}">Active</span>
+                </span>
+                <span class="account-row__body">
+                    <span class="account-row__number" th:text="${account.number}">1002 4587 3310</span>
+                    <span class="account-row__balance" th:text="${account.balance}">KES 24,500.00</span>
+                </span>
+                <!--/* The date is the reason the word "Dormant" is up there. */-->
+                <span class="account-row__note" th:if="${account.dormancy}"
+                      th:text="${account.dormancy}">No activity since 14 Aug 2025</span>
+            </a>
+        </div>
 
     </div>
 

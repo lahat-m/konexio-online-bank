@@ -16,6 +16,22 @@
     <title></title>
 </head>
 <body class="page">
+<!--/*
+  The brand panel beside a flow on a desktop screen. Hidden on a phone, and on
+  the tabbed screens, which carry the brand in their sidebar instead.
+*/-->
+<aside class="page-aside">
+    <div class="brand">
+        <span class="brand__mark" aria-hidden="true">K</span>
+        <span class="brand__name">Konexio</span>
+    </div>
+    <p class="page-aside__statement">A bank account in shillings, run from your phone or your desk.</p>
+    <ul class="page-aside__facts">
+        <li>Pay in and cash out through M-Pesa, card or an agent</li>
+        <li>Every payment is confirmed with your PIN</li>
+        <li>Borrow KES 10,000, paid straight into your account</li>
+    </ul>
+</aside>
 <th:block th:replace="${content}"></th:block>
 </body>
 </html>

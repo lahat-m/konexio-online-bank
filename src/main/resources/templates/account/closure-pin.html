@@ -33,6 +33,7 @@
                 <div class="pin__dots" aria-hidden="true">
                     <span class="pin__dot" th:each="position : ${#numbers.sequence(1, pinLength)}"></span>
                 </div>
+                <p class="pin__hint">Type your PIN on your keyboard.</p>
 
                 <div class="field" th:classappend="${pinError} ? 'field--invalid'">
                     <label class="field__label pin__label" for="pin">Your PIN</label>
